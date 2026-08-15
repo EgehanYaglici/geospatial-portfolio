@@ -4,8 +4,16 @@
 <meta charset="UTF-8">
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Egehan Yaglici, Geospatial Engineer</title>
+<title>Egehan Yaglici — GIS Engineer</title>
 <meta name="description" content="Seven geospatial engineering case studies: LiDAR classification, SAR flood detection, deep learning on satellite imagery, spatial databases and network analysis.">
+<meta property="og:title" content="Egehan Yaglici — GIS Engineer">
+<meta property="og:description" content="Geospatial engineering portfolio: LiDAR, SAR flood detection, deep learning on satellite imagery, PostGIS, Web GIS and transport simulation.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://egehanyaglici.github.io/geospatial-portfolio/">
+<meta property="og:image" content="https://egehanyaglici.github.io/geospatial-portfolio/work/traverse/img/traverse_main.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Egehan Yaglici — GIS Engineer">
+<meta name="twitter:description" content="Geospatial engineering portfolio: LiDAR, SAR, deep learning, PostGIS, Web GIS and transport simulation.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -38,9 +46,16 @@ a { text-decoration: none; color: inherit; }
 .nav-links { display: flex; gap: 20px; }
 .nav-links a { font-size: 13px; color: #636870; transition: color .15s; }
 .nav-links a:hover { color: #edf0f4; }
+@media (max-width: 480px) {
+  .nav-brand { font-size: 11.5px; }
+  .nav-links { gap: 14px; }
+  .nav-links a { font-size: 12px; }
+  .nav-links a.nav-hide { display: none; }
+}
 
 /* Hero */
 .hero { padding-block: 72px 56px; }
+@media (max-width: 640px) { .hero { padding-block: 44px 32px; } }
 .hero-tag {
   font-family: "IBM Plex Mono", monospace;
   font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
@@ -74,6 +89,12 @@ a { text-decoration: none; color: inherit; }
   margin-bottom: 0;
 }
 .cats { display: flex; gap: 0; flex-wrap: wrap; margin-bottom: 0; }
+@media (max-width: 640px) {
+  .cats-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .cats { flex-wrap: nowrap; }
+  .cat-btn { padding: 10px 14px 9px; min-width: max-content; }
+  .cat-sub { display: none; }
+}
 .cat-btn {
   font-family: "IBM Plex Mono", monospace;
   padding: 10px 20px 9px;
@@ -95,11 +116,11 @@ a { text-decoration: none; color: inherit; }
   transition: color .15s;
 }
 .cat-sub {
-  font-size: 9px; letter-spacing: .04em;
-  color: #3a3e46;
+  font-size: 9.5px; letter-spacing: .04em;
+  color: #565b67;
   transition: color .15s;
 }
-.cat-btn:hover .cat-sub { color: #52565f; }
+.cat-btn:hover .cat-sub { color: #6f747e; }
 .cat-btn.active .cat-sub { color: #4a6fa5; }
 .cat-btn .ct {
   font-size: 9px; font-weight: 500;
@@ -394,7 +415,7 @@ var CATEGORIES = [
   {
     id: 'web-gis', title: 'Web GIS', sub: 'Demos · Personal projects',
     items: [
-      { n:'Demo', slug:'traverse', title:'WebGIS Road: Collaborative Road Network Editor', desc:'Concept demo: multi-user road quality tracker and geometry editor. Three fictional field editors share live PostGIS data, claim tasks in one click, and see each other\'s pins update in real time via polling.', img:'work/traverse/img/webgis_issues.png', facts:[['Roads','170k+'],['Tasks','8 demo']], accent:'#3B82F6' },
+      { n:'Demo', slug:'traverse', title:'WebGIS Road: Collaborative Road Network Editor', desc:'Concept demo: multi-user road quality tracker and geometry editor. Three fictional field editors share live PostGIS data, claim tasks in one click, and see each other\'s pins update in real time via polling.', img:'work/traverse/img/traverse_main.png', facts:[['Roads','170k+'],['Tasks','8 demo']], accent:'#3B82F6' },
       { n:'Demo', slug:'traverse-madrid', title:'Traverse: Madrid Traffic Scenario Lab', desc:'Concept demo: real-time INFORMO traffic data and SUMO microsimulation. Design road closures or speed changes, run a simulation, compare KPIs against the baseline in under two minutes.', img:'work/traverse-madrid/img/map_loaded.png', facts:[['Sensors','4,893'],['Edges','5,942']], accent:'#3B82F6' }
     ]
   },
@@ -440,10 +461,14 @@ function renderCard(w) {
     '</div></a>';
 }
 
+var _allItems = [];
+CATEGORIES.forEach(function(c){ _allItems = _allItems.concat(c.items); });
+var CATEGORIES_WITH_ALL = [{ id:'all', title:'All', sub:'', items:_allItems }].concat(CATEGORIES);
+
 function render() {
   var catsHtml = '';
   var panelsHtml = '';
-  CATEGORIES.forEach(function(cat, i) {
+  CATEGORIES_WITH_ALL.forEach(function(cat, i) {
     catsHtml += '<button class="cat-btn' + (i===0?' active':'') + '" data-cat="' + cat.id + '">' +
       '<span class="cat-label">' + cat.title + '<span class="ct">' + cat.items.length + '</span></span>' +
       (cat.sub ? '<span class="cat-sub">' + cat.sub + '</span>' : '') +
