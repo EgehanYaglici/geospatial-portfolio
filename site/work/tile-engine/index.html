@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browser Tile Engine | Egehan Yaglici</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3987e5; }
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+.hero-row {
+  display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 28px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.case-id { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); margin-bottom: 12px; }
+.desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 10px; }
+.desc-sm { font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; }
+.tags .t { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px; }
+
+.hero-img { border: 1px solid var(--rule-strong); overflow: hidden; }
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.rule { height: 1px; background: var(--rule); margin-block: 32px; }
+.sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; margin-top: 32px; }
+.sh-no { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); min-width: 22px; }
+.sh-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+
+.body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
+.body-text + .body-text { margin-top: 10px; }
+
+.fig-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 8px; margin-top: 16px; }
+@media (max-width: 680px) { .fig-row { grid-template-columns: repeat(2,1fr); } }
+.fig-cell { border: 1px solid var(--rule-strong); padding: 14px 16px; }
+.fig-cell .fk { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.fig-cell .fv { font-size: 1.45rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.fig-cell .fu { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .img-grid { grid-template-columns: 1fr; } }
+.img-box { border: 1px solid var(--rule-strong); overflow: hidden; }
+.img-box img { width: 100%; height: auto; display: block; }
+.img-box figcaption { font-size: 11px; color: var(--ink-3); padding: 7px 11px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.pipeline { display: flex; flex-direction: column; gap: 0; margin-top: 16px; max-width: 68ch; }
+.pip-step { display: flex; gap: 14px; padding: 10px 0; border-top: 1px solid var(--rule); align-items: flex-start; }
+.pip-n { font-family: var(--mono); font-size: 10px; color: var(--accent); min-width: 28px; padding-top: 1px; }
+.pip-body { flex: 1; }
+.pip-title { font-size: 12px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.pip-desc { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+
+.code-block {
+  font-family: var(--mono); font-size: 11px; line-height: 1.7;
+  background: var(--surface-1); border: 1px solid var(--rule-strong);
+  padding: 16px 18px; overflow-x: auto; color: var(--ink-2);
+  margin-top: 14px; max-width: 68ch;
+}
+.code-block .cm { color: var(--ink-3); }
+.code-block .ck { color: var(--accent); }
+
+.mn { display: flex; gap: 10px; font-size: 12px; line-height: 1.55; padding: 7px 0; border-top: 1px solid var(--rule); }
+.mn-k { font-family: var(--mono); font-size: 10px; color: var(--ink-3); min-width: 130px; flex-shrink: 0; }
+.mn-v { color: var(--ink-2); }
+
+.collab-note {
+  margin-top: 24px; padding: 12px 16px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface-1);
+  font-size: 12px; color: var(--ink-3); line-height: 1.6;
+}
+.collab-note b { color: var(--ink-2); }
+
+.src-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  background: rgba(57,135,229,0.12); border: 1px solid rgba(57,135,229,0.3);
+  color: var(--accent); text-decoration: none; margin-top: 16px;
+  transition: background .15s, border-color .15s;
+}
+.src-btn:hover { background: rgba(57,135,229,0.2); border-color: rgba(57,135,229,0.5); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav style="padding-top:18px;padding-bottom:4px;border-bottom:1px solid var(--rule);margin-bottom:0">
+  <a href="../../" style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-decoration:none">← Egehan Yaglici</a>
+</nav>
+
+<div class="hero-row">
+  <div>
+    <div class="case-id">Client Work &middot; Geospatial Pipeline Consulting</div>
+    <h1>Browser-Based<br>Tile Engine</h1>
+    <p class="desc">Pipeline consulting engagement: a client needed high-resolution CAD plan images served as Mapbox-compatible slippy map tiles, without a server or GDAL. I designed and delivered the complete technical architecture, georeferencing via homography, anti-aliasing via a Lanczos3 mipmap pyramid, and a parallelised Z/X/Y export pipeline running entirely in the browser.</p>
+    <p class="desc-sm">The engine produces sub-pixel-accurate 512 px tiles across Z9-22, packaged as a standard zip archive ready to drop behind any static file server.</p>
+    <div class="tags">
+      <span class="t">Vanilla JS</span>
+      <span class="t">Canvas 2D API</span>
+      <span class="t">Homography</span>
+      <span class="t">Mipmap (Lanczos3)</span>
+      <span class="t">Web Mercator</span>
+      <span class="t">Mapbox GL JS</span>
+      <span class="t">JSZip</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/tile_detail_z18.jpg" alt="Tile engine output, Z18 detail, Pointe du Hoc, Normandy">
+    <figcaption>Stitched Z/18 tiles, Pointe du Hoc, Normandy. Cadastral plan overlaid on Web Mercator.</figcaption>
+  </figure>
+</div>
+
+<div class="rule"></div>
+
+<div class="fig-row">
+  <div class="fig-cell"><div class="fk">Zoom range</div><div class="fv">Z9-22</div><div class="fu">min → max</div></div>
+  <div class="fig-cell"><div class="fk">Tile size</div><div class="fv">512 px</div><div class="fu">Mapbox-compatible</div></div>
+  <div class="fig-cell"><div class="fk">Tiles generated</div><div class="fv">4,065</div><div class="fu">example output</div></div>
+  <div class="fig-cell"><div class="fk">GSD at Z22</div><div class="fv">4.8 cm</div><div class="fu">per pixel</div></div>
+</div>
+
+<div class="sh"><span class="sh-no">01</span><span class="sh-title">The brief</span></div>
+<p class="body-text">The client had high-resolution CAD plan images, flat rectilinear rasters with no coordinate metadata, and needed them served as standard slippy map tiles over a Mapbox basemap. The standard approach (GDAL, TiTiler, cloud infrastructure) was ruled out: the solution had to run entirely in a browser tab with no server-side processing.</p>
+<p class="body-text">A second constraint was aliasing: rendering a 22,000 px source directly into a 512 px tile at low zoom levels produces severe Moiré patterns. The architecture had to pre-compute a quality pyramid and select the appropriate tier at render time.</p>
+
+<div class="sh"><span class="sh-no">02</span><span class="sh-title">Source material</span></div>
+
+<div class="img-grid">
+  <figure class="img-box">
+    <img src="data/source_map.jpg" alt="Source CAD plan, Pointe du Hoc, Normandy">
+    <figcaption>Source image, 22,215 × 20,125 px flat raster plan. No embedded coordinate metadata.</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/tile_grid_z16.jpg" alt="Tile grid at Z16, 3×3 output tiles stitched">
+    <figcaption>Stitched Z/16 output, 9 tiles covering the full map extent, correctly placed in Web Mercator.</figcaption>
+  </figure>
+</div>
+
+<div class="sh"><span class="sh-no">03</span><span class="sh-title">How the engine works</span></div>
+<p class="body-text">Three phases run sequentially. Phases 1 and 2 are one-time preparation; Phase 3 is the parallelised tile batch.</p>
+
+<div class="pipeline">
+  <div class="pip-step"><span class="pip-n">1</span><div class="pip-body">
+    <div class="pip-title">Homography solve (<code>calculateHomography</code>)</div>
+    <div class="pip-desc">Builds an 8×8 linear system from the 4 GPS corner points (image corners → Web Mercator coordinates). Gaussian elimination extracts the 8 unknown coefficients of the 3×3 projective transform matrix H. This handles any perspective skew in the source image, the 4 corners do not need to form a rectangle.</div>
+  </div></div>
+  <div class="pip-step"><span class="pip-n">2</span><div class="pip-body">
+    <div class="pip-title">Mipmap pyramid (<code>buildMipmaps</code>)</div>
+    <div class="pip-desc">Uses the Pica.js Lanczos3 kernel to iteratively halve the source image: 1×, 0.5×, 0.25×, … Building the full pyramid takes a few seconds once; the tile render kernel then picks the pyramid level whose native resolution is closest to the target tile scale, eliminating Moiré at low zoom levels.</div>
+  </div></div>
+  <div class="pip-step"><span class="pip-n">3</span><div class="pip-body">
+    <div class="pip-title">Batch tile export (<code>exportTilesToZip</code>)</div>
+    <div class="pip-desc">Iterates every Z/X/Y coordinate in the requested zoom range. For each tile: (1) bounding-box culling rejects tiles that don't intersect the image, O(1), no render cost; (2) <code>generateTile</code> applies the inverse homography pixel-by-pixel across the 512×512 canvas, bilinear-blending 4 mipmap pixels per output pixel; (3) alpha-culling discards fully transparent tiles; (4) surviving tiles are encoded to PNG and injected into a JSZip archive. Batches of 16 run in parallel via <code>Promise.all()</code> with <code>setTimeout(r, 0)</code> yields to keep the browser responsive.</div>
+  </div></div>
+</div>
+
+<div class="sh"><span class="sh-no">04</span><span class="sh-title">The render kernel</span></div>
+<p class="body-text">The per-pixel loop is the mathematical core. For each pixel <code>(ox, oy)</code> in the 512×512 output tile:</p>
+
+<div class="code-block"><span class="cm">// Target pixel → Web Mercator coordinates</span>
+<span class="ck">const</span> mx = tL + (ox + 0.5) * dxMerc;
+<span class="ck">const</span> my = tT + (oy + 0.5) * dyMerc;
+
+<span class="cm">// Inverse perspective mapping via homography matrix H</span>
+<span class="ck">const</span> denom = h[6]*mx + h[7]*my + h[8];
+<span class="ck">const</span> spx   = (h[0]*mx + h[1]*my + h[2]) / denom;  <span class="cm">// source u</span>
+<span class="ck">const</span> spy   = (h[3]*mx + h[4]*my + h[5]) / denom;  <span class="cm">// source v</span>
+
+<span class="cm">// Bilinear blend of 4 surrounding mipmap pixels</span>
+<span class="ck">const</span> fx = sx - (sx|0),  fy = sy - (sy|0);
+<span class="ck">const</span> w00 = (1-fx)*(1-fy),  w10 = fx*(1-fy);
+<span class="ck">const</span> w01 = (1-fx)*fy,      w11 = fx*fy;
+</div>
+
+<p class="body-text" style="margin-top:14px">Alpha culling: if the summed alpha across all 512×512 output pixels is zero, the canvas is discarded and <code>null</code> is returned, preventing gigabytes of empty PNG files in the output zip.</p>
+
+<div class="sh"><span class="sh-no">05</span><span class="sh-title">Output format</span></div>
+<p class="body-text">The zip archive follows the standard Mapbox raster tile directory layout. Drop the extracted folder behind any static file server and point a Mapbox or MapLibre source at it:</p>
+
+<div class="code-block">map.addSource(<span class="ck">'enterprise-tiles'</span>{
+  type: <span class="ck">'raster'</span>, tiles: [<span class="ck">'path/to/extracted/tiles/{z}/{x}/{y}.png'</span>],
+  tileSize: 512,   <span class="cm">// CRITICAL, must match engine output</span>
+  minzoom: 9,
+  maxzoom: 22      <span class="cm">// hard cap: GSD ~4.8 cm/px at Z22</span>
+});
+</div>
+
+<div class="sh"><span class="sh-no">06</span><span class="sh-title">Deliverables</span></div>
+<div class="mn"><span class="mn-k">Engine source</span><span class="mn-v"><code>Tile_Engine.js</code>, self-contained, no build step, copy-paste integration</span></div>
+<div class="mn"><span class="mn-k">UI harness</span><span class="mn-v">HTML file: image loader, corner-coordinate inputs, zoom range selector, progress bar, zip download</span></div>
+<div class="mn"><span class="mn-k">Example output</span><span class="mn-v">4,065 PNG tiles (Z9-22) over Pointe du Hoc, Normandy, ready for Mapbox/MapLibre</span></div>
+<div class="mn"><span class="mn-k">Technical spec</span><span class="mn-v">9-page architecture specification covering all API surfaces, math kernels, and integration examples</span></div>
+
+<a class="src-btn" href="data/Tile_Engine.js" target="_blank" rel="noopener">View Tile_Engine.js ↗</a>
+
+<div style="height:64px"></div>
+</div>
+</body>
+</html>

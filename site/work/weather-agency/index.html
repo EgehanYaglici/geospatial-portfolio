@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Weather Agency Graphics Engine | Egehan Yaglici</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3987e5; --orange: #d95926; }
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+.hero-row {
+  display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 28px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.case-id { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); margin-bottom: 12px; }
+.desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 10px; }
+.desc-sm { font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; }
+.tags .t { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px; }
+
+.live-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  background: rgba(57,135,229,0.12); border: 1px solid rgba(57,135,229,0.3);
+  color: var(--accent); text-decoration: none;
+  transition: background .15s, border-color .15s;
+}
+.live-btn:hover { background: rgba(57,135,229,0.2); border-color: rgba(57,135,229,0.5); }
+
+.hero-img { border: 1px solid var(--rule-strong); overflow: hidden; }
+.hero-img img.hero-img video { width: 100%; height: auto; display: block; }
+.hero-img figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.rule { height: 1px; background: var(--rule); margin-block: 32px; }
+.sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; margin-top: 32px; }
+.sh-no { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); min-width: 22px; }
+.sh-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+
+.body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
+.body-text + .body-text { margin-top: 10px; }
+
+.fig-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
+.fig-cell { border: 1px solid var(--rule-strong); padding: 14px 16px; }
+.fig-cell .fk { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.fig-cell .fv { font-size: 1.45rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.fig-cell .fu { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .img-grid { grid-template-columns: 1fr; } }
+.img-box { border: 1px solid var(--rule-strong); overflow: hidden; }
+.img-box img { width: 100%; height: auto; display: block; }
+.img-box figcaption { font-size: 11px; color: var(--ink-3); padding: 7px 11px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; max-width: 680px; }
+@media (max-width: 600px) { .feat-grid { grid-template-columns: 1fr; } }
+.feat { border: 1px solid var(--rule-strong); padding: 12px 14px; background: var(--surface-1); }
+.feat-k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
+.feat-v { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+
+.stack-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
+.stack-chip { font-family: var(--mono); font-size: 10px; color: var(--ink-2); border: 1px solid var(--rule-strong); padding: 4px 10px; background: var(--surface-1); }
+
+.collab-note { margin-top: 24px; padding: 12px 16px; border: 1px solid var(--rule-strong); background: var(--surface-1); font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+.collab-note b { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav style="padding-top:18px;padding-bottom:4px;border-bottom:1px solid var(--rule);margin-bottom:0">
+  <a href="../../" style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-decoration:none">← Egehan Yaglici</a>
+</nav>
+
+<div class="hero-row">
+  <div>
+    <div class="case-id">Client Work &middot; Web GIS / SaaS</div>
+    <h1>The Weather Agency<br>Graphics Engine</h1>
+    <p class="desc">Full-stack browser-based weather graphics platform for broadcasters and content creators. Real-time radar, satellite and observation layers over a Mapbox GL JS map, keyframe animation timeline, 4K export, OBS/vMix live streaming integration.</p>
+    <p class="desc-sm">Built with <a href="https://github.com/barancck" target="_blank" rel="noopener" style="color:var(--accent)">Baran Çiçek</a>. Live at <code>graphics.theweatheragency.com</code>, paying customers, 99.9% uptime SLA.</p>
+    <div class="tags">
+      <span class="t">Vanilla JS</span>
+      <span class="t">Mapbox GL JS</span>
+      <span class="t">MapsGL</span>
+      <span class="t">XWeather API</span>
+      <span class="t">Supabase</span>
+      <span class="t">Stripe</span>
+      <span class="t">AWS CloudFront</span>
+    </div>
+    <a class="live-btn" href="https://graphics.theweatheragency.com" target="_blank" rel="noopener">Live site ↗</a>
+  </div>
+  <figure class="hero-img">
+    <img src="data/app.png" alt="The Weather Agency, weather layer panel open">
+    <figcaption>Graphics editor, weather layer panel with radar, satellite and observation options</figcaption>
+  </figure>
+</div>
+
+<div class="rule"></div>
+
+<div class="fig-row">
+  <div class="fig-cell"><div class="fk">Export</div><div class="fv">4K</div><div class="fu">MP4 · PNG · JPG</div></div>
+  <div class="fig-cell"><div class="fk">Data layers</div><div class="fv">40+</div><div class="fu">radar · sat · obs</div></div>
+  <div class="fig-cell"><div class="fk">Streaming</div><div class="fv">OBS</div><div class="fu">vMix · virtual cam</div></div>
+</div>
+
+<div class="sh"><span class="sh-no">01</span><span class="sh-title">What it does</span></div>
+<p class="body-text">Users build a weather graphic by stacking layers onto a Mapbox map, live radar, multi-spectral satellite (infrared, visible, water vapour, GeoColor), surface temperatures, dew points, wind speeds with particle animation, then annotate with draw tools, text labels, and meteorological symbols. The animation engine sequences through time steps. The result exports to MP4 at up to 4K, or streams live via a virtual camera to OBS or vMix for broadcast.</p>
+
+<div class="img-grid">
+  <figure class="img-box">
+    <img src="data/layers.webp" alt="Layer menu, Weather Layer, Asset Catalog, Draw, Text, Animation Engine">
+    <figcaption>Layer system, Weather, Assets, Draw, Text, Animation Engine, Images</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/timeline.webp" alt="Weather layer time range controls, Live, 1h, 3h, 6h, 24h, 7d, Custom">
+    <figcaption>Time range controls, live to ±7 day forecast, per-layer interval and frame fetch</figcaption>
+  </figure>
+</div>
+
+<div class="sh"><span class="sh-no">02</span><span class="sh-title">What I built</span></div>
+
+<div class="feat-grid">
+  <div class="feat">
+    <div class="feat-k">Map engine</div>
+    <div class="feat-v">Mapbox GL JS + MapsGL integration. Custom layer ordering, opacity controls, per-layer time scrubbing.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Animation timeline</div>
+    <div class="feat-v">Keyframe system with interpolation. Banner, symbol and draw assets each carry their own keyframe track. Export uses only the Format-selected area.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Export pipeline</div>
+    <div class="feat-v">Frame capture at 29.97/25 fps, H.264 MP4 assembly, PNG/JPG stills. Format step sets the crop area; Export is disabled until Format is set.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Layer data system</div>
+    <div class="feat-v">XWeather API integration for radar, satellite and observation tiles. Time range selector fetches the correct frame sequence per layer.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Auth & billing</div>
+    <div class="feat-v">Supabase auth (Google OAuth + email). Stripe subscription plans with credit-based export usage metering.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Broadcast mode</div>
+    <div class="feat-v">Virtual camera output compatible with OBS and vMix. Automated city slide templates with live data updates.</div>
+  </div>
+</div>
+
+<div class="sh"><span class="sh-no">03</span><span class="sh-title">Stack</span></div>
+<p class="body-text">No framework, vanilla JS modules with a hand-rolled project state store. Frontend deployed to AWS CloudFront. All persistence through Supabase (auth + project saves). Stripe handles subscriptions.</p>
+<div class="stack-row">
+  <span class="stack-chip">Vanilla JS (ES modules)</span>
+  <span class="stack-chip">Mapbox GL JS</span>
+  <span class="stack-chip">MapsGL (AerisWeather)</span>
+  <span class="stack-chip">XWeather API</span>
+  <span class="stack-chip">Supabase (auth + DB)</span>
+  <span class="stack-chip">Stripe</span>
+  <span class="stack-chip">AWS CloudFront + S3</span>
+  <span class="stack-chip">Figtree / JetBrains Mono</span>
+</div>
+
+<div style="height:64px"></div>
+</div>
+</body>
+</html>

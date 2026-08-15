@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Spatial API and the Cost of an Index | Egehan Yaglici</title>
+<meta name="description" content="A serverless PostGIS API design, and a measured benchmark of what a GIST index is actually worth. 16x at 250 m, 1.9x at 2 km.">
+<meta property="og:title" content="What a spatial index is actually worth">
+<meta property="og:description" content="Measured on 7,583 Amsterdam POIs in PostgreSQL 16 with PostGIS 3.4: a GIST index gives 16x at 250 m and 1.9x at 2 km.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<style>
+:root { --accent: #3987e5; --accent-dim: rgba(57,135,229,0.15); --orange: #d95926; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px;
+}
+.hero-left .desc-sm {
+  font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Hero image */
+.hero-img {
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+.hero-img .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Figures */
+.divider { height: 1px; background: var(--rule); margin-block: 32px; }
+.fig-row {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(3, 1fr); } }
+.fig-cell {
+  padding: 16px 12px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-num.highlight { color: var(--orange); }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Map */
+#map { width: 100%; height: 480px; background: var(--surface-2); border: 1px solid var(--rule-strong); }
+@media (max-width: 700px) { #map { height: 340px; } }
+.map-nokey { display: none; padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; border: 1px solid var(--rule-strong); }
+.map-controls {
+  display: flex; align-items: center; gap: 18px; padding: 12px 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+}
+.segs { display: flex; border: 1px solid var(--rule-strong); }
+.segs button {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  padding: 7px 12px; color: var(--ink-3); border-right: 1px solid var(--rule-strong);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.segs button:last-child { border-right: none; }
+.segs button:hover { color: var(--ink); }
+.segs button[aria-pressed="true"] { color: #fff; background: var(--accent-dim); }
+.slid {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+}
+.slid input { width: 120px; accent-color: var(--accent); }
+.readout {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong); border-top: none;
+}
+.readout .r { padding: 12px 14px; border-right: 1px solid var(--rule); }
+.readout .r:last-child { border-right: none; }
+.readout .rv {
+  font-family: var(--mono); font-size: 1.1rem; color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.readout .rk {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 6px;
+}
+
+/* Architecture grid */
+.arch {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  border-top: 1px solid var(--rule-strong); border-left: 1px solid var(--rule-strong);
+}
+.arch .a-n {
+  border-right: 1px solid var(--rule-strong); border-bottom: 1px solid var(--rule-strong);
+  background: var(--surface-1); padding: 16px 18px;
+}
+.arch .a-t {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink);
+}
+.arch .a-s { font-size: 12px; color: var(--ink-3); margin-top: 6px; line-height: 1.5; }
+
+/* Notes */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 02</span>
+    <div class="nav-links"><a href="#benchmark">Benchmark</a><a href="#explorer">Explorer</a><a href="#architecture">Architecture</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left text + right benchmark image -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 02 &middot; Spatial Database</div>
+    <h1>What a Spatial Index Is Actually Worth</h1>
+    <p class="desc">Every GIS tutorial says 'add a spatial index' but never measures what it actually costs or gains. This study builds a PostGIS API serving 7,583 Amsterdam POIs and benchmarks the GIST index across query radii from 250m to 2km. The result: 16x faster at small radii where the index rejects most rows, but only 1.9x at large radii where it barely helps, and nothing at all for two of three endpoint types.</p>
+    <div class="tags" style="margin-top:16px">
+      <span class="t">PostGIS 3.4</span><span class="t">PostgreSQL 16</span><span class="t">GIST</span><span class="t">Python 3.12</span><span class="t">Lambda</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/index-benchmark.png" alt="Benchmark chart showing GIST index speedup declining from 16x at 250m to 1.9x at 2km" loading="eager">
+    <figcaption><span class="fno">Preview</span>GIST index speedup vs. query radius, selectivity drives the gain.</figcaption>
+  </figure>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num highlight">16.3<span class="u">x</span></div><div class="fig-label">Speedup 250 m</div></div>
+  <div class="fig-cell"><div class="fig-num">1.9<span class="u">x</span></div><div class="fig-label">Speedup 2 km</div></div>
+  <div class="fig-cell"><div class="fig-num">0.65<span class="u">ms</span></div><div class="fig-label">Indexed 250 m</div></div>
+  <div class="fig-cell"><div class="fig-num">7,583</div><div class="fig-label">Amsterdam POIs</div></div>
+  <div class="fig-cell"><div class="fig-num">592<span class="u">kB</span></div><div class="fig-label">Index size</div></div>
+  <div class="fig-cell"><div class="fig-num">60</div><div class="fig-label">Runs / point</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 01 BENCHMARK -->
+<section id="benchmark">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">Benchmark</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">ST_DWithin on projected geometry (EPSG:28992), median of 60 runs after 10 warm-up. Without the index every radius costs ~10.5 ms because PostgreSQL scans all 7,583 rows. With the GIST index, cost tracks result-set size: 0.65 ms at 250 m, 5.78 ms at 2 km.</p>
+
+  <div class="two" style="gap:24px">
+    <div>
+      <div class="chart">
+        <div class="chart-head">
+          <span class="chart-title">Proximity query latency by radius</span>
+          <button class="tv-btn" data-tableview="tv-bench" data-label-show="Table" data-label-hide="Hide">Table</button>
+        </div>
+        <div class="legend">
+          <span class="legend-i"><span class="legend-s" style="background:var(--series-2)"></span>No index</span>
+          <span class="legend-i"><span class="legend-s" style="background:var(--series-1)"></span>GIST</span>
+        </div>
+        <div class="bars" id="b-bars" style="--barlabel:78px"></div>
+      </div>
+
+      <div class="chart" style="margin-top:24px">
+        <div class="chart-head">
+          <span class="chart-title">Rows rejected by planner</span>
+        </div>
+        <div class="bars" id="rr-bars" style="--barlabel:78px"></div>
+      </div>
+    </div>
+
+    <div>
+      <div class="tv" id="tv-bench" hidden>
+        <div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Radius</th><th>No index</th><th>GIST</th><th>Speedup</th><th>Rejected</th></tr></thead>
+          <tbody id="tv-bench-body"></tbody>
+        </table></div>
+      </div>
+
+      <div class="tbl-wrap" style="margin-top:16px">
+        <table class="data">
+          <thead><tr><th>Endpoint</th><th>No index</th><th>Indexed</th><th>Gain</th></tr></thead>
+          <tbody>
+            <tr><td>Proximity, 250 m</td><td class="num">10.680 ms</td><td class="num">0.654 ms</td><td class="num">16.3x</td></tr>
+            <tr><td>Proximity, 500 m</td><td class="num">10.307 ms</td><td class="num">1.200 ms</td><td class="num">8.6x</td></tr>
+            <tr><td>Proximity, 1 km</td><td class="num">10.600 ms</td><td class="num">2.715 ms</td><td class="num">3.9x</td></tr>
+            <tr><td>Proximity, 2 km</td><td class="num">11.192 ms</td><td class="num">5.776 ms</td><td class="num">1.9x</td></tr>
+            <tr><td>Nearest by category</td><td class="num">1.121 ms</td><td class="num">0.992 ms</td><td class="num">1.1x</td></tr>
+            <tr><td>Polygon containment</td><td class="num">1.348 ms</td><td class="num">1.321 ms</td><td class="num">1.0x</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <pre class="code" style="margin-top:16px"><span class="c">-- the proximity query being benchmarked</span>
+<span class="k">SELECT</span> name, category,
+       <span class="f">ST_Distance</span>(geog, <span class="f">ST_MakePoint</span>(:lon,:lat)::geography) <span class="k">AS</span> d
+<span class="k">FROM</span> pois
+<span class="k">WHERE</span> <span class="f">ST_DWithin</span>(geog, <span class="f">ST_MakePoint</span>(:lon,:lat)::geography, :radius)
+<span class="k">ORDER BY</span> d <span class="k">LIMIT</span> <span class="n">20</span>;</pre>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 02 EXPLORER / MAP -->
+<section id="explorer">
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Explorer</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Click the map to move the query origin. Adjust the radius slider, the readout below shows <b style="color:var(--ink)">interpolated benchmark times</b> for indexed vs sequential scan at that radius, so you can see exactly where the index stops helping. POIs inside the radius are highlighted.</p>
+
+  <div class="map-controls">
+    <span style="font-family:var(--mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-3)">Category</span>
+    <div class="segs" role="group" aria-label="Category">
+      <button data-cat="all" aria-pressed="true">All</button>
+      <button data-cat="supermarket">Market</button>
+      <button data-cat="cafe">Cafe</button>
+      <button data-cat="pharmacy">Pharm</button>
+    </div>
+    <div class="slid">
+      <span>Radius</span>
+      <input type="range" id="rad" min="100" max="2000" step="50" value="500" aria-label="Search radius in metres">
+      <span id="rad-v">500 m</span>
+    </div>
+  </div>
+  <div id="map"></div>
+  <div class="map-nokey" id="map-nokey">Map requires a Mapbox token. Benchmark data above is computed offline.</div>
+  <div class="readout" id="readout"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 03 ARCHITECTURE -->
+<section id="architecture">
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Architecture</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Three endpoints, thin handler. Geometry stays in SQL via ST_AsGeoJSON; Python only validates parameters and returns the FeatureCollection. Designed, not deployed.</p>
+
+  <div class="arch">
+    <div class="a-n"><div class="a-t">Client</div><div class="a-s">Browser or curl, consumes GeoJSON directly</div></div>
+    <div class="a-n"><div class="a-t">API Gateway</div><div class="a-s">HTTP API v2, HTTPS, no auth</div></div>
+    <div class="a-n"><div class="a-t">Lambda</div><div class="a-s">Python 3.12, validates params, runs one query</div></div>
+    <div class="a-n"><div class="a-t">RDS PostGIS</div><div class="a-s">PostgreSQL 16, geography + GIST</div></div>
+    <div class="a-n"><div class="a-t">GeoJSON</div><div class="a-s">Serialised in SQL, never in Python</div></div>
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:20px">
+    <table class="data">
+      <thead><tr><th>Endpoint</th><th>Pattern</th></tr></thead>
+      <tbody>
+        <tr><td>GET /pois/nearby</td><td class="num">ST_DWithin, EPSG:28992</td></tr>
+        <tr><td>GET /facilities/nearest</td><td class="num">category filter + distance sort</td></tr>
+        <tr><td>POST /stats/area</td><td class="num">ST_Within, group by category</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre class="code" style="margin-top:16px"><span class="c"># handler stays thin on purpose</span>
+<span class="k">def</span> <span class="f">nearby</span>(event):
+    lon, lat, r = <span class="f">validate</span>(event[<span class="s">"queryStringParameters"</span>])
+    cur.<span class="f">execute</span>(SQL_NEARBY, (lon, lat, lon, lat, r))
+    <span class="k">return</span> {
+        <span class="s">"statusCode"</span>: <span class="n">200</span><span class="s">"headers"</span>: {<span class="s">"content-type"</span>: <span class="s">"application/geo+json"</span>},
+        <span class="s">"body"</span>: cur.<span class="f">fetchone</span>()[<span class="n">0</span>],   <span class="c"># already GeoJSON</span>
+    }</pre>
+</section>
+
+<div class="divider"></div>
+
+<!-- 04 DECISIONS & LIMITS -->
+<section>
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Honesty</div><div class="mn-v"><b>Measure what exists, state what does not.</b> Database is real and benchmarked. The serverless layer is a design only.</div></div>
+      <div class="mn"><div class="mn-k">Coordinates</div><div class="mn-v"><b>geography over geometry.</b> Metres out of the box, at a measurable computational cost the benchmark exposes.</div></div>
+      <div class="mn"><div class="mn-k">Serialisation</div><div class="mn-v"><b>ST_AsGeoJSON inside the query.</b> Geometry never becomes a Python object. Keeps cold start small and failure modes few.</div></div>
+      <div class="mn"><div class="mn-k">Compute shape</div><div class="mn-v"><b>Lambda for a bursty read API.</b> Per-request billing fits the idle-almost-always shape of a portfolio project.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Not deployed</div><div class="mn-v">No AWS resources exist. Terraform written, costed ~$15/mo (RDS dominated), never applied.</div></div>
+      <div class="mn"><div class="mn-k">Local hardware</div><div class="mn-v">Benchmark ran on a container. Ratios transfer; absolute ms do not.</div></div>
+      <div class="mn"><div class="mn-k">Small table</div><div class="mn-v">7,583 rows fits in cache. Measures CPU, not I/O. On larger tables the index advantage would be greater.</div></div>
+      <div class="mn"><div class="mn-k">No auth</div><div class="mn-v">Designed endpoints are public with no rate limiting. First thing to add for production.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 02 / Spatial API</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script src="../../assets/js/viz.js"></script>
+<script>
+var E = Viz.esc, F = Viz.fmt;
+
+/* Benchmark data from bench.json */
+var B = [
+  {r:'250 m',  no:10.680, gist:0.654, rrNo:7501, rrG:40},
+  {r:'500 m',  no:10.307, gist:1.200, rrNo:7314, rrG:128},
+  {r:'1 km',   no:10.600, gist:2.715, rrNo:6742, rrG:301},
+  {r:'2 km',   no:11.192, gist:5.776, rrNo:5689, rrG:896}
+];
+
+(function () {
+  var max = 12;
+  document.getElementById('b-bars').innerHTML = B.map(function (d) {
+    var tip = JSON.stringify([
+      {k:'No index', v:F(d.no,2) + ' ms', color:'#d95926'},
+      {k:'GIST', v:F(d.gist,2) + ' ms', color:'#3987e5'},
+      {k:'Speedup', v:F(d.no / d.gist,1) + 'x'}
+    ]);
+    return '<div class="bar-row"><span class="bar-lab mono" style="font-size:12px">' + E(d.r) + '</span>' +
+      '<div class="bar-track bar-group">' +
+        '<div class="bar-fill s2" data-w="' + (d.no / max * 100) + '%" data-tip-title="' + E(d.r) + '" data-tip-rows=\'' + tip + '\'></div>' +
+        '<div class="bar-fill"    data-w="' + (d.gist / max * 100) + '%" data-tip-title="' + E(d.r) + '" data-tip-rows=\'' + tip + '\'></div>' +
+      '</div><span class="bar-val">' + F(d.no / d.gist,1) + 'x</span></div>';
+  }).join('');
+
+  document.getElementById('rr-bars').innerHTML = B.map(function (d) {
+    var tip = JSON.stringify([
+      {k:'Sequential scan', v:d.rrNo.toLocaleString('en-GB') + ' rejected', color:'#d95926'},
+      {k:'GIST', v:d.rrG.toLocaleString('en-GB') + ' rejected', color:'#3987e5'}
+    ]);
+    return '<div class="bar-row"><span class="bar-lab mono" style="font-size:12px">' + E(d.r) + '</span>' +
+      '<div class="bar-track bar-group">' +
+        '<div class="bar-fill s2" data-w="' + (d.rrNo / 7583 * 100) + '%" data-tip-title="' + E(d.r) + '" data-tip-rows=\'' + tip + '\'></div>' +
+        '<div class="bar-fill"    data-w="' + (d.rrG / 7583 * 100) + '%" data-tip-title="' + E(d.r) + '" data-tip-rows=\'' + tip + '\'></div>' +
+      '</div><span class="bar-val">' + d.rrG + '</span></div>';
+  }).join('');
+
+  document.getElementById('tv-bench-body').innerHTML = B.map(function (d) {
+    return '<tr><td>' + E(d.r) + '</td><td class="num">' + F(d.no,3) + ' ms</td><td class="num">' +
+      F(d.gist,3) + ' ms</td><td class="num">' + F(d.no / d.gist,1) + 'x</td><td class="num">' + d.rrG + '</td></tr>';
+  }).join('');
+})();
+
+/* Interpolate benchmark from measured points */
+var BENCH_PTS = [
+  {r:250,  gist:0.654,  seq:10.680},
+  {r:500,  gist:1.200,  seq:10.307},
+  {r:1000, gist:2.715,  seq:10.600},
+  {r:2000, gist:5.776,  seq:11.192}
+];
+function interpBench(radius) {
+  var pts = BENCH_PTS;
+  if (radius <= pts[0].r) return {gist:pts[0].gist, seq:pts[0].seq, speedup:pts[0].seq/pts[0].gist};
+  if (radius >= pts[pts.length-1].r) { var l=pts[pts.length-1]; return {gist:l.gist, seq:l.seq, speedup:l.seq/l.gist}; }
+  for (var i=0; i<pts.length-1; i++) {
+    if (radius >= pts[i].r && radius <= pts[i+1].r) {
+      var t = (radius - pts[i].r) / (pts[i+1].r - pts[i].r);
+      var g = pts[i].gist + t * (pts[i+1].gist - pts[i].gist);
+      var s = pts[i].seq + t * (pts[i+1].seq - pts[i].seq);
+      return {gist:g, seq:s, speedup:s/g};
+    }
+  }
+  var last = pts[pts.length-1];
+  return {gist:last.gist, seq:last.seq, speedup:last.seq/last.gist};
+}
+
+/* Map explorer */
+(function () {
+  var TOKEN = 'pk.REDACTED_MAPBOX_TOKEN';
+  var cat = 'all', radius = 500, pois = null, origin = [4.8924, 52.3731], map = null, ready = false;
+
+  function dist(a, b) {
+    var R = 6371008.8, t = Math.PI / 180;
+    var dLat = (b[1] - a[1]) * t, dLon = (b[0] - a[0]) * t;
+    var la1 = a[1] * t, la2 = b[1] * t;
+    var h = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(la1) * Math.cos(la2) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    return 2 * R * Math.asin(Math.sqrt(h));
+  }
+
+  function circle(c, r) {
+    var pts = [], t = Math.PI / 180;
+    for (var i = 0; i <= 72; i++) {
+      var a = i / 72 * 2 * Math.PI;
+      var dy = r * Math.cos(a) / 111320;
+      var dx = r * Math.sin(a) / (111320 * Math.cos(c[1] * t));
+      pts.push([c[0] + dx, c[1] + dy]);
+    }
+    return {type:'Feature', geometry:{type:'Polygon', coordinates:[pts]}, properties:{}};
+  }
+
+  function run() {
+    if (!pois) return;
+    var t0 = performance.now();
+    var hit = pois.features.filter(function (f) {
+      if (cat !== 'all' && f.properties.category !== cat) return false;
+      return dist(origin, f.geometry.coordinates) <= radius;
+    });
+    var ms = performance.now() - t0;
+    var bench = interpBench(radius);
+    document.getElementById('readout').innerHTML =
+      '<div class="r"><div class="rv">' + hit.length + '</div><div class="rk">Matches</div></div>' +
+      '<div class="r"><div class="rv">' + radius + '<span style="font-size:.6em;color:var(--ink-3)"> m</span></div><div class="rk">Radius</div></div>' +
+      '<div class="r"><div class="rv" style="color:var(--accent)">' + F(bench.gist,2) + '<span style="font-size:.6em;color:var(--ink-3)"> ms</span></div><div class="rk">GIST index</div></div>' +
+      '<div class="r"><div class="rv" style="color:var(--orange)">' + F(bench.seq,1) + '<span style="font-size:.6em;color:var(--ink-3)"> ms</span></div><div class="rk">Seq scan</div></div>' +
+      '<div class="r"><div class="rv">' + F(bench.speedup,1) + '<span style="font-size:.6em;color:var(--ink-3)">x</span></div><div class="rk">Speedup</div></div>';
+    if (ready) {
+      map.getSource('hit').setData({type:'FeatureCollection', features:hit});
+      map.getSource('ring').setData(circle(origin, radius));
+      map.getSource('org').setData({type:'Feature', geometry:{type:'Point', coordinates:origin}, properties:{}});
+    }
+  }
+
+  fetch('data/pois.geojson').then(function (r) { return r.json(); })
+    .then(function (j) { pois = j; run(); }).catch(function () {});
+
+  if (!window.mapboxgl || !TOKEN) {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('map-nokey').style.display = 'block';
+  } else {
+    mapboxgl.accessToken = TOKEN;
+    map = new mapboxgl.Map({container:'map', style:'mapbox://styles/mapbox/dark-v11',
+      center:origin, zoom:13.2});
+    map.addControl(new mapboxgl.NavigationControl({showCompass:false}), 'top-right');
+    map.on('error', function () {
+      document.getElementById('map').style.display = 'none';
+      document.getElementById('map-nokey').style.display = 'block';
+    });
+    map.on('load', function () {
+      var empty = {type:'FeatureCollection', features:[]};
+      map.addSource('all', {type:'geojson', data:'data/pois.geojson'});
+      map.addSource('hit', {type:'geojson', data:empty});
+      map.addSource('ring', {type:'geojson', data:empty});
+      map.addSource('org', {type:'geojson', data:empty});
+      map.addLayer({id:'all-pt', type:'circle', source:'all',
+        paint:{'circle-radius':2, 'circle-color':'#4a4f56', 'circle-opacity':0.7}});
+      map.addLayer({id:'ring-l', type:'line', source:'ring',
+        paint:{'line-color':'#3987e5','line-width':1.2,'line-dasharray':[2,2]}});
+      map.addLayer({id:'hit-pt', type:'circle', source:'hit',
+        paint:{'circle-radius':3.6,'circle-color':'#3987e5','circle-stroke-width':1,'circle-stroke-color':'#0a0b0c'}});
+      map.addLayer({id:'org-pt', type:'circle', source:'org',
+        paint:{'circle-radius':6,'circle-color':'#d95926','circle-stroke-width':2,'circle-stroke-color':'#0a0b0c'}});
+      ready = true; run();
+    });
+    map.on('click', function (e) { origin = [e.lngLat.lng, e.lngLat.lat]; run(); });
+  }
+
+  document.querySelectorAll('[data-cat]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-cat]').forEach(function (x) { x.removeAttribute('aria-pressed'); });
+      b.setAttribute('aria-pressed','true'); cat = b.dataset.cat; run();
+    });
+  });
+  document.getElementById('rad').addEventListener('input', function (e) {
+    radius = +e.target.value;
+    document.getElementById('rad-v').textContent = radius + ' m';
+    run();
+  });
+})();
+
+Viz.init(document);
+</script>
+</body>
+</html>

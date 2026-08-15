@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Traverse: Madrid Traffic Scenario Lab | Egehan Yaglici</title>
+<meta name="description" content="SUMO-backed traffic simulation lab for Madrid. Create road scenarios, run SUMO microsimulations, compare KPIs against live INFORMO baseline measurements.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3B82F6; --green: #10B981; --amber: #F59E0B; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 32px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.case-id { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); margin-bottom: 12px; }
+.desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 10px; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 20px; }
+.tags .t { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px; }
+
+.live-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.35);
+  color: var(--accent); text-decoration: none; transition: background .15s, border-color .15s;
+}
+.live-btn:hover { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.6); }
+
+.hero-img-box { border: 1px solid var(--rule-strong); overflow: hidden; }
+.hero-img-box img { width: 100%; display: block; }
+.hero-img-box figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.rule { height: 1px; background: var(--rule); margin-block: 32px; }
+
+.sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; margin-top: 32px; }
+.sh-no { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); min-width: 22px; }
+.sh-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+
+.body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
+.body-text + .body-text { margin-top: 10px; }
+
+/* Key metrics row */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule-strong); border: 1px solid var(--rule-strong); margin-top: 18px; }
+.metric { background: var(--surface-1); padding: 14px 16px; }
+.metric-k { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.metric-v { font-size: 1.4rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; font-family: var(--mono); }
+.metric-u { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+@media (max-width: 640px) { .metrics { grid-template-columns: 1fr 1fr; } }
+
+/* Two-col layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Feature blocks */
+.feature { border: 1px solid var(--rule-strong); background: var(--surface-1); padding: 18px; }
+.feature-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.feature-title { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; letter-spacing: -.01em; }
+.feature-desc { font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+
+/* Flow diagram */
+.flow { display: flex; align-items: center; gap: 0; margin-top: 16px; flex-wrap: wrap; }
+.flow-step { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 90px; padding: 12px 8px; border: 1px solid var(--rule-strong); background: var(--surface-1); text-align: center; }
+.flow-step-n { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.flow-step-label { font-size: 11px; font-weight: 600; color: var(--ink); }
+.flow-arrow { font-size: 11px; color: var(--ink-4); padding: 0 4px; flex-shrink: 0; }
+
+/* Stack table */
+.stack-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+.stack-table td { padding: 8px 12px; border-bottom: 1px solid var(--rule); font-size: 12.5px; vertical-align: top; }
+.stack-table td:first-child { font-family: var(--mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; width: 140px; }
+.stack-table td:last-child { color: var(--ink-2); }
+.stack-table tr:last-child td { border-bottom: none; }
+
+/* KPI table */
+.kpi-table { width: 100%; border-collapse: collapse; font-size: 12.5px; margin-top: 16px; }
+.kpi-table th { text-align: left; font-family: var(--mono); font-size: 9.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); border-bottom: 1px solid var(--rule-strong); padding: 5px 8px; }
+.kpi-table td { padding: 8px; border-bottom: 1px solid var(--rule); color: var(--ink-2); }
+.kpi-table td:first-child { color: var(--ink); }
+.kpi-table td.num { font-family: var(--mono); color: #34D399; font-weight: 500; }
+
+/* Scenario cards */
+.scenarios { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .scenarios { grid-template-columns: 1fr; } }
+.scenario { border: 1px solid var(--rule-strong); background: var(--surface-1); padding: 16px; }
+.scenario-label { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.scenario-title { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.scenario-steps { list-style: none; padding: 0; }
+.scenario-steps li { font-size: 11.5px; color: var(--ink-3); padding: 3px 0; display: flex; align-items: center; gap: 7px; }
+.scenario-steps li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--rule-strong); flex-shrink: 0; }
+
+/* Back link */
+.back { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; color: var(--ink-3); padding: 14px 0; transition: color .15s; text-decoration: none; }
+.back:hover { color: var(--ink); }
+
+/* Inline code */
+code { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2); border: 1px solid var(--rule); padding: 1px 5px; color: var(--ink-2); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Traffic Scenario Lab</span>
+    <div class="nav-links">
+      <a href="../../#work">Work</a>
+      <a href="../../#about">About</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <a class="back" href="../../">← All projects</a>
+
+  <!-- Hero -->
+  <div class="hero-row">
+    <div>
+      <div class="case-id">Personal Project · Traffic Simulation</div>
+      <h1>Traverse: Madrid Traffic Scenario Lab</h1>
+      <p class="desc">
+        Browser-based traffic scenario lab for central Madrid. Draw a road closure or speed-limit change on the map, hit Run, and a SUMO microsimulation returns fleet-level KPIs: mean speed, total delay, vehicle-km: in under two minutes, calibrated against live INFORMO loop-detector data.
+      </p>
+      <div class="tags">
+        <span class="t">React 18 + TypeScript</span>
+        <span class="t">FastAPI + asyncpg</span>
+        <span class="t">PostGIS + MVT</span>
+        <span class="t">MapLibre GL JS</span>
+        <span class="t">SUMO 1.27</span>
+        <span class="t">INFORMO XML</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        <a class="live-btn" href="http://localhost:3001" target="_blank" rel="noopener">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#3B82F6" stroke-width="1.5"/><circle cx="5" cy="5" r="1.5" fill="#3B82F6"/></svg>
+          Live demo
+        </a>
+      </div>
+    </div>
+
+    <figure class="hero-img-box">
+      <img src="img/app_home.png" alt="Traverse Madrid app: dark map with road network, INFORMO header, and scenario panel" loading="eager">
+      <figcaption>2,681 PostGIS road segments as MVT tiles on a dark basemap. INFORMO sensor count in the top bar. Scenario panel floating top-left.</figcaption>
+    </figure>
+  </div>
+
+  <!-- Metrics -->
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-k">INFORMO sensors</div>
+      <div class="metric-v">4,893</div>
+      <div class="metric-u">loop detectors, Madrid</div>
+    </div>
+    <div class="metric">
+      <div class="metric-k">SUMO edges</div>
+      <div class="metric-v">5,942</div>
+      <div class="metric-u">3,700 junctions, OSM</div>
+    </div>
+    <div class="metric">
+      <div class="metric-k">Sim turnaround</div>
+      <div class="metric-v">&lt; 2 min</div>
+      <div class="metric-u">1-hour road scenario</div>
+    </div>
+    <div class="metric">
+      <div class="metric-k">Vehicles simulated</div>
+      <div class="metric-v">301</div>
+      <div class="metric-u">baseline run, calibrated</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- What it does -->
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">What it does</span></div>
+  <p class="body-text">
+    Traverse lets you design and run a traffic scenario for central Madrid in the same time it takes to write a permit application. Select or create a scenario in the panel, add patches (close a road, lower a speed limit, change lane count), click Run, and the backend starts a SUMO microsimulation on the patched road network. Results: mean speed, mean delay, vehicle-km, total vehicles: arrive inline in the panel when the run completes.
+  </p>
+  <p class="body-text">
+    Traffic density for each simulation is calibrated from the average vehicle intensity measured by Madrid's INFORMO loop detectors (4,893 measurement points) inside the study area. The SUMO network is built directly from an OpenStreetMap extract of the Gran Vía corridor using netconvert, so every edge in the simulation corresponds to a real road.
+  </p>
+
+  <div class="rule"></div>
+
+  <!-- Simulation pipeline -->
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Simulation pipeline</span></div>
+  <p class="body-text">Four stages, from scenario definition to KPI results in the panel:</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <span class="flow-step-n">Stage 1</span>
+      <span class="flow-step-label">Network export</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Stage 2</span>
+      <span class="flow-step-label">Apply patches</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Stage 3</span>
+      <span class="flow-step-label">Route generation</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Stage 4</span>
+      <span class="flow-step-label">SUMO run</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Stage 5</span>
+      <span class="flow-step-label">Parse outputs</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Stage 6</span>
+      <span class="flow-step-label">KPIs in panel</span>
+    </div>
+  </div>
+
+  <p class="body-text" style="margin-top:16px">
+    The <code>.net.xml</code> is pre-built and cached. Each run copies it into an isolated temp directory, applies the scenario patches via Python ElementTree, then calls <code>randomTrips.py --validate</code> (which internally runs duarouter) to generate calibrated O-D routes. SUMO runs for 3,600 simulated seconds, 1 s step. Outputs are <code>tripinfo.xml</code> (per-vehicle) and <code>edge_data.xml</code> (3,104 edge intervals). Both are parsed and stored to the DB summary, then surfaced in the React panel.
+  </p>
+
+  <div class="rule"></div>
+
+  <!-- Demo scenarios -->
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Demo scenarios</span></div>
+  <p class="body-text">Four scenario types you can create and run against the baseline:</p>
+
+  <div class="scenarios">
+    <div class="scenario">
+      <div class="scenario-label" style="color:#3B82F6">Baseline run</div>
+      <div class="scenario-title">No patches: calibrated to INFORMO</div>
+      <ul class="scenario-steps">
+        <li>Create a scenario with no patches</li>
+        <li>Hit Run: randomTrips calibrates to avg INFORMO intensity</li>
+        <li>SUMO runs 301 vehicles on 5,942-edge network</li>
+        <li>KPIs: 27.0 km/h · 386.8 s travel time · 849 veh-km</li>
+      </ul>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:#EF4444">Road closure</div>
+      <div class="scenario-title">Close an edge, watch vehicles reroute</div>
+      <ul class="scenario-steps">
+        <li>Select a road on the map → open scenario toolbar</li>
+        <li>Add "road_close" patch: edge removed from .net.xml</li>
+        <li>Run → duarouter finds alternate routes around the gap</li>
+        <li>Compare mean delay Δ against baseline in results panel</li>
+      </ul>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:#F59E0B">Speed change</div>
+      <div class="scenario-title">Lower or raise a road's speed limit</div>
+      <ul class="scenario-steps">
+        <li>Add "speed_change" patch with target km/h</li>
+        <li>Edge speed attribute updated in .net.xml before SUMO</li>
+        <li>Vehicles on that edge respect the new limit</li>
+        <li>Fleet-level mean speed shifts measurably in results</li>
+      </ul>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:#8B5CF6">Lane change</div>
+      <div class="scenario-title">Reduce capacity on a busy corridor</div>
+      <ul class="scenario-steps">
+        <li>Add "lane_change" patch: numLanes attribute in .net.xml</li>
+        <li>Simulates a construction lane reduction or bus-lane addition</li>
+        <li>Bottleneck effect propagates upstream in SUMO queue model</li>
+        <li>Delay and travel time increase visible in KPI table</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- Features -->
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Features</span></div>
+
+  <div class="two-col">
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(59,130,246,0.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      </div>
+      <div class="feature-title">SUMO microsimulation</div>
+      <div class="feature-desc">eclipse-sumo 1.27.1 runs each scenario in an isolated temp directory. Route files are generated fresh per run, calibrated to observed INFORMO density. 1-hour sim in under 2 minutes.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="feature-title">Live INFORMO data</div>
+      <div class="feature-desc">4,893 Madrid loop-detector measurements imported from the INFORMO XML feed. Coordinates converted from UTM30N (EPSG:25830). Average vehicle intensity per sensor drives trip generation period.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(245,158,11,0.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="feature-title">MapLibre vector tiles</div>
+      <div class="feature-desc">2,681 road segments served from PostGIS via ST_AsMVT at <code>/api/tiles/{z}/{x}/{y}.pbf</code>. Zoom-adaptive geometry simplification. Colour and width vary by highway class.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(139,92,246,0.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+      </div>
+      <div class="feature-title">Scenario patches</div>
+      <div class="feature-desc">Five patch types accessible from a floating bottom toolbar: close road, set lanes, remove a lane, speed limit, reverse direction. Each patch is stored as a JSON row in the DB and applied to the .net.xml via Python ElementTree before the SUMO run. Multiple roads can be patched in a single scenario.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.12)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M18 17l-5-5-4 4-3-3"/></svg>
+      </div>
+      <div class="feature-title">Road condition colouring</div>
+      <div class="feature-desc">Each road segment in the viewport is joined spatially (KNN, &lt; 60 m) to its nearest INFORMO loop detector. Congestion level is derived from observed speed ÷ free-flow speed and painted in four classes: free, moderate, heavy, severe. Query: 30 ms on a 5,942-road + 4,893-sensor dataset via nested PostGIS LATERALs.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(59,130,246,0.12)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      </div>
+      <div class="feature-title">KPI results panel</div>
+      <div class="feature-desc">Mean speed, mean travel time, mean delay, total vehicles, vehicle-km travelled: all surfaced inline below the scenario card. Parsed from SUMO's tripinfo.xml and edge_data.xml outputs.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(16,185,129,0.12)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7M11 18H8a2 2 0 0 1-2-2V9"/></svg>
+      </div>
+      <div class="feature-title">OSM-direct SUMO network</div>
+      <div class="feature-desc">netconvert builds the .net.xml directly from an OSM extract (not custom node/edge XML). Avoids compound edge ID parsing failures. Pre-cached at data/madrid_network.net.xml for zero-wait sim starts.</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <!-- Results -->
+  <div class="sh"><span class="sh-no">05</span><span class="sh-title">Baseline simulation results</span></div>
+  <p class="body-text">Real numbers from the first successful end-to-end run on the 5,942-edge Madrid network:</p>
+
+  <table class="kpi-table">
+    <thead>
+      <tr><th>KPI</th><th>Value</th><th>Source</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Mean speed</td><td class="num">27.0 km/h</td><td>SUMO tripinfo.xml</td></tr>
+      <tr><td>Mean travel time</td><td class="num">386.8 s</td><td>SUMO tripinfo.xml</td></tr>
+      <tr><td>Total vehicles</td><td class="num">301</td><td>SUMO tripinfo.xml</td></tr>
+      <tr><td>Vehicle-km travelled</td><td class="num">849.2 km</td><td>SUMO tripinfo.xml</td></tr>
+      <tr><td>Mean delay</td><td class="num">113.7 s</td><td>SUMO tripinfo.xml</td></tr>
+      <tr><td>Edge result intervals</td><td class="num">3,104</td><td>SUMO edge_data.xml</td></tr>
+    </tbody>
+  </table>
+
+  <div class="rule"></div>
+
+  <!-- Technical stack -->
+  <div class="sh"><span class="sh-no">06</span><span class="sh-title">Technical stack</span></div>
+
+  <table class="stack-table">
+    <tr>
+      <td>Frontend</td>
+      <td>React 18 + Vite + TypeScript, zero TypeScript errors. MapLibre GL JS for all map rendering. Glass-morphism floating panels. No external component library: all inline styles.</td>
+    </tr>
+    <tr>
+      <td>Map tiles</td>
+      <td>PostGIS <code>ST_AsMVT</code> → FastAPI → MapLibre. MVT endpoint at <code>/api/tiles/{z}/{x}/{y}.pbf</code>. 33 KB tiles at Z12 for central Madrid. Zoom-adaptive <code>ST_Simplify</code> tolerance.</td>
+    </tr>
+    <tr>
+      <td>Backend</td>
+      <td>FastAPI + asyncpg (async throughout). Background task per simulation run. Sync SQLAlchemy engine inside thread pool for SUMO runner. INFORMO, roads, scenarios, patches, observations all in PostGIS.</td>
+    </tr>
+    <tr>
+      <td>SUMO</td>
+      <td><code>eclipse-sumo==1.27.1</code> via pip. Binary resolved via <code>Path(sumo.__file__).parent / "bin" / "sumo"</code> (not on PATH). <code>randomTrips.py --validate</code> + duarouter for calibrated route files. Run isolation via <code>tempfile.mkdtemp</code>.</td>
+    </tr>
+    <tr>
+      <td>Database</td>
+      <td>PostgreSQL + PostGIS. Tables: <code>roads</code>, <code>study_areas</code>, <code>scenarios</code>, <code>scenario_patches</code>, <code>simulation_runs</code>, <code>simulation_edge_results</code>, <code>traffic_measurement_points</code>, <code>traffic_observations</code>. GIST spatial index on all geometry columns.</td>
+    </tr>
+    <tr>
+      <td>Data</td>
+      <td>INFORMO XML feed (4,893 sensors, UTM30N → WGS84 via pyproj). OSM extract via Overpass API for Gran Vía corridor (40.4014,−3.7263 → 40.4310,−3.6757). Road segments imported via osmnx.</td>
+    </tr>
+  </table>
+
+  <div class="rule"></div>
+
+  <!-- Engineering notes -->
+  <div class="sh"><span class="sh-no">07</span><span class="sh-title">Engineering notes</span></div>
+
+  <p class="body-text">
+    <strong>asyncpg cast conflict.</strong> SQLAlchemy named parameters (<code>:param</code>) conflict with PostgreSQL's cast operator (<code>::jsonb</code>) at the asyncpg driver level. The driver sees <code>:after::jsonb</code> and silently drops the bind, leaving the SQL unsubstituted and returning <code>PostgresSyntaxError: syntax error at or near ":"</code>. Fixed everywhere by replacing <code>::type</code> suffixes with <code>CAST(:param AS type)</code>.
+  </p>
+  <p class="body-text" style="margin-top:12px">
+    <strong>CTE materialization breaks KNN.</strong> The road-conditions query used a <code>latest_per_sensor</code> CTE to pre-compute each sensor's most recent speed reading, then joined via <code>JOIN LATERAL … ORDER BY geom &lt;-&gt; road LIMIT 1</code>. PostgreSQL materializes CTEs by default (PG 12+), discarding the GiST spatial index on the base table. Without it the LATERAL degrades from O(roads × log sensors) to O(roads × sensors): ~29 million geography comparisons, 120 s → timeout. Fixed by replacing the CTE with nested LATERALs scanning <code>traffic_measurement_points</code> directly so <code>idx_tmp_geom</code> drives the KNN scan. Query time after: 30 ms.
+  </p>
+  <p class="body-text" style="margin-top:12px">
+    <strong>netconvert segfault (exit 139).</strong> Custom node/edge XML generated from PostGIS caused netconvert to segfault during junction-shape computation. Root cause: osmnx simplifies multi-segment roads into compound OSM IDs like <code>[7642969, 1184792073]</code>, producing edge IDs of the form <code>way/[7642969, ...]</code> which are invalid in SUMO's XML parser. Fixed by switching from PostGIS-generated XML to direct OSM file import via <code>netconvert --osm-files madrid_network.osm</code>. The native parser handles all 5,942 edges cleanly.
+  </p>
+  <p class="body-text" style="margin-top:12px">
+    <strong>NaN maxspeed propagation.</strong> osmnx stores missing maxspeed values as <code>"nan"</code> strings. In Python, <code>float("nan")</code> is a valid float (not a ValueError), so NaN propagated silently into SUMO's network XML causing <code>invalid maxSpeed</code> warnings. Fixed with an explicit NaN check (<code>val == val</code>) before using the speed value.
+  </p>
+  <p class="body-text" style="margin-top:12px">
+    <strong>SUMO binary discovery on macOS ARM64.</strong> <code>shutil.which("sumo")</code> returns None because the eclipse-sumo pip package installs its binaries into the venv's <code>lib/pythonX.Y/site-packages/sumo/bin/</code>, which is not on PATH. Fixed via explicit lookup: <code>Path(sumo.__file__).parent / "bin" / "sumo"</code>.
+  </p>
+
+  <div class="rule"></div>
+
+  <!-- Screenshots -->
+  <div class="sh"><span class="sh-no">08</span><span class="sh-title">Screenshots</span></div>
+  <p class="body-text">All screenshots taken from the live running application.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/app_home.png" alt="Traverse Madrid app home: road network on dark map with INFORMO bar and scenario panel" loading="lazy">
+      <figcaption>App home. 2,681 road segments, INFORMO sensor count in the header, scenario list floating top-left.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/app_scenario.png" alt="Expanded scenario card with Run simulation button" loading="lazy">
+      <figcaption>Scenario expanded. Run simulation button visible. Clicking starts the SUMO pipeline as a FastAPI background task.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0;grid-column:1/-1">
+      <img src="img/app_results.png" alt="Simulation results panel showing KPIs: mean speed 27.0 km/h, 301 vehicles, 849 km, 113.7s delay" loading="lazy">
+      <figcaption>Results after the baseline run completes. Mean speed 27.0 km/h · 301 vehicles · 849 vehicle-km · 113.7 s mean delay. All parsed from SUMO's tripinfo.xml output.</figcaption>
+    </figure>
+  </div>
+
+  <div class="rule"></div>
+  <div style="padding-bottom: 64px">
+    <a class="back" href="../../">← All projects</a>
+  </div>
+
+</div>
+
+<footer class="foot">
+  <div class="wrap foot-i">
+    <span style="font-family:var(--mono);font-size:11px;color:var(--ink-4)">Egehan Yaglici</span>
+    <div class="foot-links">
+      <a href="../../#work">Work</a>
+      <a href="../../#about">About</a>
+      <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,42 @@
+metric,value
+file,lucas_county_oh.laz
+file_size_mb,76.82
+point_count,13694252
+x_min,281405.23665906634
+x_max,281792.87665906636
+x_range_m,387.64000000001397
+y_min,4610558.3995808875
+y_max,4610946.099580887
+y_range_m,387.69999999925494
+area_m2,150288.0279997166
+area_km2,0.1502880279997166
+z_min,175.9603023430281
+z_max,216.8403023430281
+z_range,40.879999999999995
+z_mean,189.83267572348004
+z_std,5.119722089171606
+z_p05,177.9803023430281
+z_p25,188.5503023430281
+z_p50,189.0503023430281
+z_p75,190.9303023430281
+z_p95,198.4603023430281
+point_density_per_m2,91.12
+classification_distribution_1 - Unclassified,6921545
+classification_distribution_2 - Ground,2877845
+classification_distribution_3 - Low Vegetation,102984
+classification_distribution_4 - Medium Vegetation,796547
+classification_distribution_5 - High Vegetation,1915430
+classification_distribution_6 - Building,1079901
+return_distribution_Return 1,11293294
+return_distribution_Return 2,1674338
+return_distribution_Return 3,570315
+return_distribution_Return 4,133341
+return_distribution_Return 5,20776
+return_distribution_Return 6,2066
+return_distribution_Return 7,122
+intensity_min,444
+intensity_max,65535
+intensity_mean,4267.452667659395
+intensity_std,3451.5270233765627
+scan_angle_min,-3333.0
+scan_angle_max,3333.0

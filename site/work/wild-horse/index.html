@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wild Horse Reservoir Map Animation | Egehan Yaglici</title>
+<meta name="description" content="2:36 min animated map fly-through for a Colorado reservoir public information video. Mapbox GL JS, KML overlays, terrain colour grade.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3987e5; --orange: #d95926; }
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px; }
+.hero-left .desc-sm { font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+.hero-img { border: 1px solid var(--rule-strong); overflow: hidden; }
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+
+.sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 16px; margin-top: 36px; }
+.sh-no { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); min-width: 22px; }
+.sh-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+.rule { height: 1px; background: var(--rule); margin-block: 28px; }
+
+.body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
+.body-text + .body-text { margin-top: 10px; }
+
+.fig-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
+.fig-cell { border: 1px solid var(--rule-strong); padding: 14px 16px; }
+.fig-cell .fk { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.fig-cell .fv { font-size: 1.45rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.fig-cell .fu { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+.mn { display: flex; gap: 10px; font-size: 12px; line-height: 1.55; padding: 6px 0; border-top: 1px solid var(--rule); }
+.mn-k { font-family: var(--mono); font-size: 10px; color: var(--ink-3); min-width: 100px; }
+.mn-v { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav style="padding-top:18px;padding-bottom:4px;border-bottom:1px solid var(--rule);margin-bottom:0">
+  <a href="../../" style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-decoration:none">← Egehan Yaglici</a>
+</nav>
+
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Client Work &middot; Cartographic Animation</div>
+    <h1>Wild Horse Reservoir</h1>
+    <p class="desc">Animated fly-through map sequence for a 2:36 min public information video about the Wild Horse Reservoir project in Park County, Colorado.</p>
+    <p class="desc-sm">Freelance project. Built without After Effects or Blender, Mapbox GL JS programmatic camera path, KML site polygons converted to GeoJSON overlays, Mapbox custom terrain style with green-yellow colour grade matching the original broadcast reference.</p>
+    <div class="tags">
+      <span class="t">Mapbox GL JS</span>
+      <span class="t">KML / GeoJSON</span>
+      <span class="t">Camera animation</span>
+      <span class="t">Terrain styling</span>
+      <span class="t">Colorado</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/map.jpg" alt="Wild Horse Reservoir animated map, Park County, Colorado">
+    <figcaption>Park County overview, animated flythrough at ~30° pitch, 29.97 fps, 1920×1080</figcaption>
+  </figure>
+</div>
+
+<div class="rule"></div>
+
+<div class="fig-row">
+  <div class="fig-cell"><div class="fk">Duration</div><div class="fv">2:36</div><div class="fu">minutes</div></div>
+  <div class="fig-cell"><div class="fk">Resolution</div><div class="fv">1080p</div><div class="fu">29.97 fps</div></div>
+  <div class="fig-cell"><div class="fk">Location</div><div class="fv">Park Co.</div><div class="fu">Colorado, USA</div></div>
+</div>
+
+<div class="sh"><span class="sh-no">01</span><span class="sh-title">The constraint</span></div>
+<p class="body-text">The client had a reference video produced in GEOlayers 3 for After Effects, custom terrain colour grade, perspective text labels anchored to the ground plane, smooth camera paths. The brief was to reproduce this without AE or Blender, using only free tools.</p>
+
+<div class="sh"><span class="sh-no">02</span><span class="sh-title">Approach</span></div>
+<p class="body-text">Site boundaries from the client's KMZ files were converted to GeoJSON and loaded as fill + line layers in Mapbox GL JS. A programmatic camera path sequences through <code>flyTo</code> calls with matched pitch and bearing to replicate the original framing. Terrain colour was matched via a custom Mapbox style with adjusted hillshade highlight and shadow colours. Frames were captured at 29.97 fps and assembled into the final MP4.</p>
+
+<div class="sh"><span class="sh-no">03</span><span class="sh-title">Deliverables</span></div>
+<div class="mn"><span class="mn-k">Video</span><span class="mn-v">1920×1080 MP4, 2:36 min, 29.97 fps, H.264</span></div>
+<div class="mn"><span class="mn-k">Source</span><span class="mn-v">Mapbox GL JS animation page + GeoJSON overlays</span></div>
+<div class="mn"><span class="mn-k">Data</span><span class="mn-v">KMZ → GeoJSON conversion for all site polygons and KOP boundaries</span></div>
+
+<div style="height:64px"></div>
+</div>
+</body>
+</html>

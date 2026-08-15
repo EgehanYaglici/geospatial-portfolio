@@ -1,0 +1,118 @@
+{
+  "radii": {
+    "250": {
+      "no index": {
+        "median": 10.68,
+        "p95": 16.155,
+        "mean": 11.844,
+        "plan": "Seq Scan",
+        "rows_removed": 7501
+      },
+      "gist": {
+        "median": 0.654,
+        "p95": 1.258,
+        "mean": 0.765,
+        "plan": "Bitmap Heap Scan",
+        "rows_removed": 40
+      }
+    },
+    "500": {
+      "no index": {
+        "median": 10.307,
+        "p95": 11.801,
+        "mean": 10.453,
+        "plan": "Seq Scan",
+        "rows_removed": 7314
+      },
+      "gist": {
+        "median": 1.2,
+        "p95": 1.283,
+        "mean": 1.207,
+        "plan": "Bitmap Heap Scan",
+        "rows_removed": 128
+      }
+    },
+    "1000": {
+      "no index": {
+        "median": 10.6,
+        "p95": 12.79,
+        "mean": 10.863,
+        "plan": "Seq Scan",
+        "rows_removed": 6742
+      },
+      "gist": {
+        "median": 2.715,
+        "p95": 2.882,
+        "mean": 2.738,
+        "plan": "Bitmap Heap Scan",
+        "rows_removed": 301
+      }
+    },
+    "2000": {
+      "no index": {
+        "median": 11.192,
+        "p95": 11.81,
+        "mean": 11.3,
+        "plan": "Seq Scan",
+        "rows_removed": 5689
+      },
+      "gist": {
+        "median": 5.776,
+        "p95": 6.001,
+        "mean": 5.81,
+        "plan": "Bitmap Heap Scan",
+        "rows_removed": 896
+      }
+    }
+  },
+  "queries": {
+    "nearest_by_category": {
+      "no index": {
+        "median": 0.892,
+        "p95": 0.999,
+        "mean": 0.912
+      },
+      "gist": {
+        "median": 0.978,
+        "p95": 1.162,
+        "mean": 1.001
+      }
+    },
+    "polygon_containment": {
+      "no index": {
+        "median": 1.348,
+        "p95": 2.261,
+        "mean": 1.502
+      },
+      "gist": {
+        "median": 1.321,
+        "p95": 1.476,
+        "mean": 1.338
+      }
+    }
+  },
+  "index_size": "592 kB",
+  "table_size": "2672 kB",
+  "n_pois": 7583,
+  "n_transit": 1641,
+  "postgis": "3.4.2",
+  "postgres": "16.13 (Ubuntu 16.13-0ubuntu0.24.04.1)",
+  "category_index": {
+    "no_btree_ms": 1.121,
+    "btree_ms": 0.992,
+    "speedup": 1.13,
+    "supermarket_rows": 250
+  },
+  "categories": {
+    "parking": 4032,
+    "restaurant": 1996,
+    "cafe": 720,
+    "school": 348,
+    "supermarket": 250,
+    "pharmacy": 89,
+    "clinic": 61,
+    "fuel": 53,
+    "university": 27,
+    "hospital": 7
+  }
+}

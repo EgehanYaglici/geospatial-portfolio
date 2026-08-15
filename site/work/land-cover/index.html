@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Land Cover Segmentation | Egehan Yaglici</title>
+<meta name="description" content="U-Net trained on ESA WorldCover labels across six European regions, tested on two held-out regions. 70.8% overall accuracy on unseen geography.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3987e5; --accent-dim: rgba(57,135,229,0.15); --orange: #d95926; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px;
+}
+.hero-left .desc-sm {
+  font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Hero image */
+.hero-img {
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+.hero-img .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Figures */
+.divider { height: 1px; background: var(--rule); margin-block: 32px; }
+.fig-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(2, 1fr); } }
+.fig-cell {
+  padding: 16px 12px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-num.highlight { color: var(--orange); }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Compare slider */
+.cmp {
+  position: relative; border: 1px solid var(--rule-strong); overflow: hidden;
+  background: var(--surface-2); aspect-ratio: 1/1;
+  cursor: col-resize; user-select: none; touch-action: none;
+}
+.cmp img {
+  position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border: 0;
+  pointer-events: none; -webkit-user-drag: none;
+}
+.cmp .top { clip-path: inset(0 50% 0 0); }
+.cmp .bar {
+  position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+  background: rgba(255,255,255,0.7); pointer-events: none;
+  transform: translateX(-0.5px);
+}
+.cmp .handle {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+  width: 40px; height: 40px; pointer-events: none;
+  display: flex; align-items: center; justify-content: center;
+}
+.cmp .handle::before {
+  content: ''; width: 40px; height: 40px; border-radius: 50%;
+  background: rgba(18,20,24,0.75); border: 1.5px solid rgba(255,255,255,0.5);
+  backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+}
+.cmp .handle .arrows {
+  position: absolute; display: flex; align-items: center; gap: 6px;
+  color: rgba(255,255,255,0.8); font-size: 11px;
+}
+.cmp .lab {
+  position: absolute; bottom: 12px; font-family: var(--mono); font-size: 9.5px; letter-spacing: .08em;
+  text-transform: uppercase; color: rgba(255,255,255,0.8); background: rgba(10,11,14.7);
+  padding: 4px 9px; pointer-events: none; backdrop-filter: blur(4px);
+}
+
+/* Gallery */
+.gallery {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+}
+@media (max-width: 700px) { .gallery { grid-template-columns: 1fr; } }
+.gallery figure { margin: 0; }
+.gallery img {
+  width: 100%; aspect-ratio: 1/1; object-fit: cover; display: block;
+  border: 1px solid var(--rule-strong);
+}
+.gallery figcaption {
+  font-size: 11px; color: var(--ink-3); margin-top: 6px;
+}
+.gallery figcaption .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Results images */
+.results-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 18px;
+}
+@media (max-width: 700px) { .results-grid { grid-template-columns: 1fr; } }
+.results-grid figure { margin: 0; }
+.results-grid img {
+  width: 100%; height: auto; display: block; border: 1px solid var(--rule-strong);
+}
+.results-grid figcaption {
+  font-size: 11px; color: var(--ink-3); margin-top: 7px;
+}
+.results-grid figcaption .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Legend */
+.legend-cls {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 0;
+  border-top: 1px solid var(--rule); border-left: 1px solid var(--rule); margin-top: 14px;
+}
+.legend-cls .c {
+  border-right: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 11px 13px;
+  background: var(--surface-1); display: flex; gap: 9px; align-items: flex-start;
+}
+.legend-cls .sw { width: 11px; height: 11px; flex: none; margin-top: 3px; border-radius: 1px; }
+.legend-cls .n { font-size: 12.5px; color: var(--ink); line-height: 1.35; }
+.legend-cls .v { font-family: var(--mono); font-size: 10.5px; color: var(--ink-3); margin-top: 3px; }
+
+/* Notes */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 06</span>
+    <div class="nav-links"><a href="#results">Results</a><a href="#method">Method</a><a href="#decisions">Decisions</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left text + right preview image -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 06 &middot; Machine Learning</div>
+    <h1>Land Cover Segmentation</h1>
+    <p class="desc">The goal: train a deep learning model to automatically classify satellite imagery into land cover types (water, forest, cropland, urban, vegetation, industrial), <b style="color:var(--ink)">pixel by pixel, at 10 m resolution</b>. The model is a U-Net with a ResNet-18 encoder, trained on Sentinel-2 imagery labelled by ESA WorldCover across six European regions.</p>
+    <p class="desc" style="margin-top:10px">The model was trained with <b style="color:var(--ink)">minimal data, only 25 minutes</b> on an Apple MPS GPU, using a small subset of available patches. Even with this limited training, it achieves <b style="color:var(--accent)">70.8% accuracy on geography it has never seen</b>. With more training data and longer epochs, this architecture would scale significantly higher. The gap between 98.5% (random split) and 70.8% (geographic hold-out) is the honest measure of generalisation.</p>
+    <div class="tags" style="margin-top:16px">
+      <span class="t">PyTorch</span><span class="t">U-Net</span><span class="t">Sentinel-2 L2A</span><span class="t">ESA WorldCover</span><span class="t">ResNet-18</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/seg_pred.png" alt="Predicted land cover classification map showing six classes" loading="eager">
+    <figcaption><span class="fno">Preview</span>Predicted classification on held-out region, six land cover classes from a single Sentinel-2 acquisition.</figcaption>
+  </figure>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num highlight">70.8<span class="u">%</span></div><div class="fig-label">Overall accuracy</div></div>
+  <div class="fig-cell"><div class="fig-num">0.531</div><div class="fig-label">Mean IoU</div></div>
+  <div class="fig-cell"><div class="fig-num">0.880</div><div class="fig-label">Water IoU</div></div>
+  <div class="fig-cell"><div class="fig-num">25<span class="u">min</span></div><div class="fig-label">Training time</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- COMPARE VIEWER -->
+<section id="compare">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">Prediction vs Imagery</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Drag the slider to compare the model's predicted classification against the Sentinel-2 true-colour composite. The model segments water, forest, cropland, urban fabric, vegetation, and industrial areas from three visible bands alone.</p>
+  <div class="cmp" id="cmp" style="max-width:100%">
+    <img src="data/seg_rgb.jpg" alt="Sentinel-2 true colour composite" loading="lazy" draggable="false">
+    <img src="data/seg_pred.png" class="top" id="cmp-top" alt="Predicted land cover classes" loading="lazy" draggable="false">
+    <div class="bar" id="cmp-bar"></div>
+    <div class="handle" id="cmp-handle"><span class="arrows">&lsaquo; &rsaquo;</span></div>
+    <span class="lab" style="left:12px">Prediction</span>
+    <span class="lab" style="right:12px">Sentinel-2</span>
+  </div>
+  <div class="legend-cls" id="cls-legend"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Results</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Training converges after 19 epochs. The per class scores show where the model fails: vegetation and cropland are the hardest to separate with only three visible bands. Water and forest are classified reliably.</p>
+  <div class="results-grid">
+    <figure>
+      <img src="data/training_curves.png" alt="Training and validation loss curves over 20 epochs">
+      <figcaption><span class="fno">Fig 1</span>Loss curves, training converges by epoch 19. Best checkpoint selected at minimum validation loss.</figcaption>
+    </figure>
+    <figure>
+      <img src="data/per_class_iou.png" alt="Per class Intersection over Union on the held-out regions, Water 0.880 down to Vegetation 0.215">
+      <figcaption><span class="fno">Fig 2</span>Per class IoU on the held-out test set. The headline 0.531 is the mean of the five classes that carry test pixels.</figcaption>
+    </figure>
+  </div>
+
+  <div class="method-notes" style="margin-top:20px">
+    <div class="mn"><div class="mn-k">Water</div><div class="mn-v">IoU <b>0.880</b>. Spectrally distinct, almost no confusion with other classes.</div></div>
+    <div class="mn"><div class="mn-k">Forest</div><div class="mn-v">IoU <b>0.703</b>. Strong performance; occasional confusion with low vegetation at edges.</div></div>
+    <div class="mn"><div class="mn-k">Cropland</div><div class="mn-v">IoU <b>0.477</b>. Seasonal variability across regions degrades generalisation.</div></div>
+    <div class="mn"><div class="mn-k">Urban</div><div class="mn-v">IoU <b>0.380</b>. Mixed pixels at building edges; rooftop spectra vary between cities.</div></div>
+    <div class="mn"><div class="mn-k">Vegetation</div><div class="mn-v">IoU <b>0.215</b>. Lowest class; three bands cannot separate shrubland from grassland reliably.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MULTI-CITY PREDICTIONS -->
+<section id="cities">
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Multi-city Predictions</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">The trained model applied to three additional European cities. Each pair shows the Sentinel-2 input (top row) and the predicted classification (bottom row). Urban morphology, vegetation patterns, and waterways are captured differently depending on the city structure.</p>
+  <div class="gallery">
+    <figure>
+      <img src="data/seg_paris_rgb.jpg" alt="Sentinel-2 true colour of Paris region">
+      <figcaption><span class="fno">Paris</span>Sentinel-2 input</figcaption>
+    </figure>
+    <figure>
+      <img src="data/seg_rotterdam_rgb.jpg" alt="Sentinel-2 true colour of Rotterdam region">
+      <figcaption><span class="fno">Rotterdam</span>Sentinel-2 input</figcaption>
+    </figure>
+    <figure>
+      <img src="data/seg_netherlands_rgb.jpg" alt="Sentinel-2 true colour of Netherlands region">
+      <figcaption><span class="fno">Netherlands</span>Sentinel-2 input</figcaption>
+    </figure>
+  </div>
+  <div class="gallery" style="margin-top:12px">
+    <figure>
+      <img src="data/seg_paris_pred.png" alt="Predicted land cover for Paris region">
+      <figcaption><span class="fno">Paris</span>Predicted classification</figcaption>
+    </figure>
+    <figure>
+      <img src="data/seg_rotterdam_pred.png" alt="Predicted land cover for Rotterdam region">
+      <figcaption><span class="fno">Rotterdam</span>Predicted classification</figcaption>
+    </figure>
+    <figure>
+      <img src="data/seg_netherlands_pred.png" alt="Predicted land cover for Netherlands region">
+      <figcaption><span class="fno">Netherlands</span>Predicted classification</figcaption>
+    </figure>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- METHOD -->
+<section id="method">
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Method</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">U-Net with a ResNet-18 encoder pre-trained on ImageNet, fine-tuned on Sentinel-2 patches paired with ESA WorldCover 2021 labels. Six training regions (Bavaria, Paris, Netherlands, Mazury, Ebro, Po delta); two held-out test regions (Stockholm, Thessaly) chosen at climatic extremes.</p>
+  <div class="method-notes">
+    <div class="mn"><div class="mn-k">Architecture</div><div class="mn-v"><b>U-Net, ResNet-18 encoder</b>. Pre-trained on ImageNet, fine-tuned end-to-end on 3-band Sentinel-2 patches.</div></div>
+    <div class="mn"><div class="mn-k">Imagery</div><div class="mn-v"><b>Sentinel-2 L2A, 3 bands</b>. Visible only (B2, B3, B4). One cloud-free acquisition per region.</div></div>
+    <div class="mn"><div class="mn-k">Labels</div><div class="mn-v"><b>ESA WorldCover 2021</b>. 11 classes merged to 6. Co-registered at 10 m resolution.</div></div>
+    <div class="mn"><div class="mn-k">Training</div><div class="mn-v"><b>20 epochs, best at 19.</b> 1,491 train / 165 val / 465 test patches. 25.3 min on Apple MPS.</div></div>
+    <div class="mn"><div class="mn-k">Split</div><div class="mn-v"><b>Geographic hold-out.</b> Entire regions reserved for test, not random patches. This is the key design choice.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DECISIONS & LIMITS -->
+<section id="decisions">
+  <div class="sh"><span class="sh-no">05</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Evaluation</div><div class="mn-v"><b>Hold out regions, not patches.</b> Costs 28 points of headline accuracy but is the only split that tests generalisation.</div></div>
+      <div class="mn"><div class="mn-k">Labels</div><div class="mn-v"><b>WorldCover instead of hand annotation.</b> Free, global, 10 m, co-registered. Caps accuracy at ~76%.</div></div>
+      <div class="mn"><div class="mn-k">Class scheme</div><div class="mn-v"><b>Eleven classes down to six.</b> Three bands cannot separate shrubland from grassland.</div></div>
+      <div class="mn"><div class="mn-k">Compute</div><div class="mn-v"><b>Laptop-scale deliberately.</b> 25 min on Apple MPS keeps the iteration loop short.</div></div>
+      <div class="mn"><div class="mn-k">Reporting</div><div class="mn-v"><b>Both numbers.</b> 98.5% random split and 70.8% region hold-out. The gap is the finding.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Label ceiling</div><div class="mn-v">WorldCover is ~76% accurate globally. Label noise cannot be separated from model error.</div></div>
+      <div class="mn"><div class="mn-k">Scale</div><div class="mn-v">1,491 training patches across six regions. Production models train on millions.</div></div>
+      <div class="mn"><div class="mn-k">Single date</div><div class="mn-v">One acquisition per region. Cropland is seasonal; a multi-temporal composite would help.</div></div>
+      <div class="mn"><div class="mn-k">Three bands</div><div class="mn-v">Visible only. NIR and red-edge would raise the two weakest classes substantially.</div></div>
+      <div class="mn"><div class="mn-k">Two regions</div><div class="mn-v">Better than random split, still a small sample. Leave-one-region-out would be ideal.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 06 / Land Cover Segmentation</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="../../assets/js/viz.js"></script>
+<script>
+var E = Viz.esc, F = Viz.fmt;
+
+var CLS = [
+  {n:'Water',          iou:0.8801, f1:0.9362, sup:7407836, c:'#3987e5'},
+  {n:'Forest',         iou:0.7027, f1:0.8254, sup:6552383, c:'#199e70'},
+  {n:'Cropland',       iou:0.4767, f1:0.6456, sup:4533713, c:'#c98500'},
+  {n:'Urban and road', iou:0.3803, f1:0.5511, sup:3187146, c:'#d95926'},
+  {n:'Vegetation',     iou:0.2149, f1:0.3537, sup:5450826, c:'#9085e9'},
+  {n:'Industrial',     iou:null,   f1:null,   sup:0,       c:'#6e747c'}
+];
+
+/* Class legend */
+(function () {
+  document.getElementById('cls-legend').innerHTML = CLS.map(function (d) {
+    return '<div class="c"><span class="sw" style="background:' + d.c + '"></span><div>' +
+      '<div class="n">' + E(d.n) + '</div><div class="v">' +
+      (d.iou === null ? 'no test pixels' : 'IoU ' + F(d.iou,3)) + '</div></div></div>';
+  }).join('');
+})();
+
+/* Drag to compare */
+(function () {
+  var box = document.getElementById('cmp'), top = document.getElementById('cmp-top'),
+      bar = document.getElementById('cmp-bar'), handle = document.getElementById('cmp-handle'),
+      down = false;
+  function set(x) {
+    var r = box.getBoundingClientRect();
+    var p = Math.max(0, Math.min(1, (x - r.left) / r.width));
+    var pct = (p * 100) + '%';
+    top.style.clipPath = 'inset(0 ' + (100 - p * 100) + '% 0 0)';
+    bar.style.left = pct;
+    handle.style.left = pct;
+  }
+  box.addEventListener('pointerdown', function (e) { e.preventDefault(); down = true; box.setPointerCapture(e.pointerId); set(e.clientX); });
+  box.addEventListener('pointermove', function (e) { if (down) set(e.clientX); });
+  box.addEventListener('pointerup', function () { down = false; });
+  box.addEventListener('pointercancel', function () { down = false; });
+})();
+
+Viz.init(document);
+</script>
+</body>
+</html>

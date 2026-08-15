@@ -1,0 +1,127 @@
+{
+  "raster": {
+    "dtm_hole_fraction": 0.5552,
+    "ndsm_valid_fraction": 0.7359,
+    "ndsm_min": -5.19,
+    "ndsm_max": 173.88,
+    "ndsm_mean": 7.3,
+    "ndsm_median": 0.84
+  },
+  "footprints_total": 1753,
+  "footprints_measured": 1740,
+  "measured_fraction": 0.9926,
+  "estimator": "p90 of nDSM inside footprint eroded by 1.0 m",
+  "height_median_m": 15.49,
+  "height_mean_m": 15.64,
+  "height_max_m": 158.31,
+  "above_50m": 38,
+  "above_100m": 7,
+  "height_distribution": {
+    "0-5m": 203,
+    "5-10m": 207,
+    "10-15m": 371,
+    "15-20m": 740,
+    "20-30m": 144,
+    "30-50m": 37,
+    "50-100m": 31,
+    "100-250m": 7
+  },
+  "by_era": {
+    "pre-1940": {
+      "count": 906.0,
+      "median": 16.0,
+      "mean": 14.73,
+      "max": 54.57
+    },
+    "1940-1980": {
+      "count": 440.0,
+      "median": 15.51,
+      "mean": 15.82,
+      "max": 73.3
+    },
+    "1980-2000": {
+      "count": 270.0,
+      "median": 11.44,
+      "mean": 15.21,
+      "max": 103.38
+    },
+    "2000+": {
+      "count": 124.0,
+      "median": 11.82,
+      "mean": 22.6,
+      "max": 158.31
+    }
+  },
+  "tallest": [
+    {
+      "bag_id": "0599100000754173",
+      "bouwjaar": 2011,
+      "height_m": 158.3,
+      "max_nDSM_m": 173.9,
+      "footprint_m2": 3087.5
+    },
+    {
+      "bag_id": "0599100100015923",
+      "bouwjaar": 2019,
+      "height_m": 103.7,
+      "max_nDSM_m": 108.9,
+      "footprint_m2": 541.7
+    },
+    {
+      "bag_id": "0599100000702531",
+      "bouwjaar": 2004,
+      "height_m": 103.6,
+      "max_nDSM_m": 109.4,
+      "footprint_m2": 2482.2
+    },
+    {
+      "bag_id": "0599100000701103",
+      "bouwjaar": 1996,
+      "height_m": 103.4,
+      "max_nDSM_m": 105.6,
+      "footprint_m2": 1519.1
+    },
+    {
+      "bag_id": "0599100000753288",
+      "bouwjaar": 2009,
+      "height_m": 103.3,
+      "max_nDSM_m": 126.2,
+      "footprint_m2": 3709.8
+    },
+    {
+      "bag_id": "0599100100004790",
+      "bouwjaar": 2013,
+      "height_m": 102.4,
+      "max_nDSM_m": 111.3,
+      "footprint_m2": 2780.6
+    },
+    {
+      "bag_id": "0599100000432858",
+      "bouwjaar": 2006,
+      "height_m": 102.2,
+      "max_nDSM_m": 109.1,
+      "footprint_m2": 887.4
+    },
+    {
+      "bag_id": "0599100000627495",
+      "bouwjaar": 2000,
+      "height_m": 97.2,
+      "max_nDSM_m": 102.1,
+      "footprint_m2": 2669.3
+    },
+    {
+      "bag_id": "0599100000617946",
+      "bouwjaar": 1991,
+      "height_m": 94.3,
+      "max_nDSM_m": 100.1,
+      "footprint_m2": 1456.6
+    },
+    {
+      "bag_id": "0599100000691009",
+      "bouwjaar": 2000,
+      "height_m": 90.7,
+      "max_nDSM_m": 96.5,
+      "footprint_m2": 2335.6
+    }
+  ]
+}

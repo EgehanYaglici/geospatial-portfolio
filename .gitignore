@@ -1,0 +1,68 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.venv/
+venv/
+env/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Data (large files, not committed, re-run acquisition scripts)
+*/data/raw/
+*/data/interim/
+*/data/processed/
+*/data/working/
+*/data/reference/
+
+# Large outputs (rasters, point clouds)
+**/*.tif
+**/*.laz
+**/*.las
+**/*.gpkg
+**/*.parquet
+
+# Model weights
+**/models/*.pt
+**/models/*.pth
+**/models/*.ckpt
+
+# OSMnx / requests cache
+cache/
+
+# Scratch folders
+_to_delete/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AWS
+.terraform/
+*.tfstate
+*.tfstate.backup
+.terraform.lock.hcl
+
+# Node
+node_modules/
+package-lock.json
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Docker
+docker-compose.override.yml

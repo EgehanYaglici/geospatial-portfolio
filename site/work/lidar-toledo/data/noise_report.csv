@@ -1,0 +1,9 @@
+metric,value
+total_points,13694252
+noise_points,1980
+noise_percentage,0.0145
+k_neighbours,12
+multiplier,3.5
+mean_distance,0.190557
+std_distance,0.098324
+threshold,0.534692

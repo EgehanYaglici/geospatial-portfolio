@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rotterdam Building Heights | Egehan Yaglici</title>
+<meta name="description" content="AHN's bare earth model has no returns beneath a roof. Closing a 55% nodata gap measures 1,740 Rotterdam buildings.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<style>
+:root { --accent: #3987e5; --accent-dim: rgba(57,135,229,0.15); --orange: #d95926; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px;
+}
+.hero-left .desc-sm {
+  font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Hero image */
+.hero-img {
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+.hero-img .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Figures */
+.divider { height: 1px; background: var(--rule); margin-block: 32px; }
+.fig-row {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(3, 1fr); } }
+.fig-cell {
+  padding: 16px 12px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-num.highlight { color: var(--orange); }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Map */
+#map { width: 100%; height: 480px; background: var(--surface-2); border: 1px solid var(--rule-strong); }
+@media (max-width: 700px) { #map { height: 340px; } }
+.map-nokey { display: none; padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; border: 1px solid var(--rule-strong); }
+.map-controls {
+  display: flex; align-items: center; gap: 18px; padding: 12px 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+}
+.segs { display: flex; border: 1px solid var(--rule-strong); }
+.segs button {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  padding: 7px 12px; color: var(--ink-3); border-right: 1px solid var(--rule-strong);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.segs button:last-child { border-right: none; }
+.segs button:hover { color: var(--ink); }
+.segs button[aria-pressed="true"] { color: #fff; background: var(--accent-dim); }
+.slid {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 10px; color: var(--ink-3);
+}
+.slid input { width: 120px; accent-color: var(--accent); }
+.readout {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong); border-top: none;
+}
+.readout .r { padding: 12px 14px; border-right: 1px solid var(--rule); }
+.readout .r:last-child { border-right: none; }
+.readout .rv {
+  font-family: var(--mono); font-size: 1.1rem; color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.readout .rk {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 6px;
+}
+
+/* Notes */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 04</span>
+    <div class="nav-links"><a href="#map-section">Map</a><a href="#era">Era</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left text + right 3D preview -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 04 &middot; Raster / Elevation</div>
+    <h1>Rotterdam Building Heights</h1>
+    <p class="desc">The Netherlands publishes a nationwide LiDAR elevation model (AHN). Subtracting bare earth (DTM) from the surface model (DSM) should give building height, but bare earth carries <b style="color:var(--ink)">no returns beneath a roof</b>. <b style="color:var(--orange)">55% of the tile is nodata</b> exactly where it matters. This study reconstructs the missing terrain and measures <b style="color:var(--ink)">1,740 buildings</b> in central Rotterdam.</p>
+    <p class="desc" style="margin-top:10px">Building footprints come from the Dutch cadastre (BAG) via PDOK, each carrying a <b style="color:var(--ink)">construction year</b>. That turns the height analysis into a temporal one: which era built tall, how the skyline shifted after 2000.</p>
+    <div class="tags" style="margin-top:16px">
+      <span class="t">AHN LiDAR</span><span class="t">PDOK WCS</span><span class="t">BAG WFS</span><span class="t">Rasterio</span><span class="t">SciPy</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/ndsm_overlay.jpg" alt="Normalised height model (nDSM) of central Rotterdam coloured by building height" loading="eager">
+    <figcaption><span class="fno">Preview</span>nDSM, building heights coloured from low (dark) to high (bright). The Kop van Zuid cluster visible at centre.</figcaption>
+  </figure>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num highlight">55.5<span class="u">%</span></div><div class="fig-label">DTM nodata</div></div>
+  <div class="fig-cell"><div class="fig-num">1,740</div><div class="fig-label">Buildings</div></div>
+  <div class="fig-cell"><div class="fig-num">99.3<span class="u">%</span></div><div class="fig-label">Covered</div></div>
+  <div class="fig-cell"><div class="fig-num">15.5<span class="u">m</span></div><div class="fig-label">Median</div></div>
+  <div class="fig-cell"><div class="fig-num">158<span class="u">m</span></div><div class="fig-label">Tallest</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 3D MAP EXPLORER -->
+<section id="map-section">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">3D Explorer</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Every measured building extruded to its p90 height. Switch between height colouring and construction era to see how the skyline evolved. Use the slider to filter by minimum height.</p>
+  <div class="map-controls">
+    <span class="label">Colour</span>
+    <div class="segs" role="group" aria-label="Colour by">
+      <button data-color="height" aria-pressed="true">Height</button>
+      <button data-color="era">Construction era</button>
+    </div>
+    <div class="slid">
+      <span>Min</span>
+      <input type="range" id="minh" min="0" max="60" step="1" value="0" aria-label="Minimum height">
+      <span id="minh-v">0 m</span>
+    </div>
+  </div>
+  <div id="map"></div>
+  <div class="map-nokey" id="map-nokey">Map requires a Mapbox token. All figures are computed offline.</div>
+  <div class="readout" id="readout"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA & METHOD -->
+<section>
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Data &amp; Method</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Two raster layers from PDOK (0.5 m resolution, EPSG:28992): the DSM includes all surfaces, the DTM is bare earth only. Nodata holes in the DTM are filled from nearest valid ground and smoothed over 20 m. Each BAG footprint is eroded 1 m before sampling the nDSM, because edge pixels straddle the wall. The p90 of the remaining sample sits on the main roof plane.</p>
+  <figure style="margin-top:14px">
+    <img src="data/gap.png" alt="DTM nodata holes, closed nDSM, DSM shaded relief" style="width:100%;border:1px solid var(--rule-strong)">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:7px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-right:5px">Fig 1</span>Left: DTM as delivered, red where buildings block the ground. Centre: nDSM after terrain reconstruction. Right: DSM shaded relief showing the Maas, Erasmusbrug, Kop van Zuid.</figcaption>
+  </figure>
+</section>
+
+<div class="divider"></div>
+
+<!-- ERA ANALYSIS -->
+<section id="era">
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Height by construction era</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Each building carries a construction year from the Dutch cadastre (BAG). Grouping by era reveals that the post-war reconstruction did not raise the median. What grew is the tail: a handful of towers after 2000.</p>
+  <div class="two" style="gap:24px">
+    <div>
+      <div class="chart">
+        <div class="chart-head"><span class="chart-title">Height distribution</span>
+          <button class="tv-btn" data-tableview="tv-dist" data-label-show="Table" data-label-hide="Hide">Table</button>
+        </div>
+        <div class="bars" id="dist-bars" style="--barlabel:72px"></div>
+      </div>
+      <div class="tv mt16" id="tv-dist" hidden>
+        <div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Band</th><th>Count</th><th>Share</th></tr></thead>
+          <tbody id="tv-dist-body"></tbody></table></div>
+      </div>
+    </div>
+    <div>
+      <div class="chart">
+        <div class="chart-head"><span class="chart-title">Median vs tallest by era</span>
+          <button class="tv-btn" data-tableview="tv-era" data-label-show="Table" data-label-hide="Hide">Table</button>
+        </div>
+        <div class="legend">
+          <span class="legend-i"><span class="legend-s" style="background:var(--series-1)"></span>Median</span>
+          <span class="legend-i"><span class="legend-s" style="background:var(--series-2)"></span>Tallest</span>
+        </div>
+        <div class="bars" id="era-bars" style="--barlabel:80px"></div>
+      </div>
+      <div class="tv mt16" id="tv-era" hidden>
+        <div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Era</th><th>Count</th><th>Median</th><th>Mean</th><th>Max</th></tr></thead>
+          <tbody id="tv-era-body"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ESTIMATOR -->
+<section>
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Estimator choice</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">A footprint has a distribution of height values. Which statistic you pick as "the height" moves the tallest building by 65 m. The p90 sits on the main roof plane; max captures antenna masts.</p>
+  <div class="two" style="gap:24px">
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead><tr><th>Estimator</th><th>Median</th><th>p90</th><th>Tallest</th><th>&lt;1 m</th></tr></thead>
+        <tbody>
+          <tr><td>mean</td><td class="num">13.41</td><td class="num">18.35</td><td class="num">109.2 m</td><td class="num">3.62%</td></tr>
+          <tr><td>median</td><td class="num">14.42</td><td class="num">19.01</td><td class="num">105.0 m</td><td class="num">4.54%</td></tr>
+          <tr><td>p75</td><td class="num">15.15</td><td class="num">20.72</td><td class="num">153.4 m</td><td class="num">3.62%</td></tr>
+          <tr class="total"><td>p90 (chosen)</td><td class="num">15.49</td><td class="num">22.01</td><td class="num">158.3 m</td><td class="num">2.93%</td></tr>
+          <tr><td>max</td><td class="num">16.32</td><td class="num">25.04</td><td class="num">173.9 m</td><td class="num">1.15%</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead><tr><th>BAG id</th><th>Built</th><th>Roof (p90)</th><th>Area</th></tr></thead>
+        <tbody id="tall-body"></tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DECISIONS & LIMITS -->
+<section>
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">No fallback</div><div class="mn-v">Failed download exits non-zero. <b>A silent fallback to synthetic data is worse than a crash.</b></div></div>
+      <div class="mn"><div class="mn-k">Terrain</div><div class="mn-v">Close the DTM holes, do not clip nDSM. Clipping leaves every building at zero.</div></div>
+      <div class="mn"><div class="mn-k">Erosion</div><div class="mn-v">Footprint eroded 1 m. Edge pixels straddle the wall and bias small buildings down.</div></div>
+      <div class="mn"><div class="mn-k">Source</div><div class="mn-v">BAG over OSM: authoritative, carries <b>bouwjaar</b> for each polygon.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Terrain fill</div><div class="mn-v">Ground under a footprint is inferred. On a slope, that error goes into the height.</div></div>
+      <div class="mn"><div class="mn-k">Vegetation</div><div class="mn-v">p90 resists a few contaminated pixels, not a canopy over a small roof.</div></div>
+      <div class="mn"><div class="mn-k">No validation</div><div class="mn-v">No independent survey to score against. No accuracy figure reported.</div></div>
+      <div class="mn"><div class="mn-k">Extent</div><div class="mn-v">1.5 km study area includes the high-rise cluster. Tail is heavier than the city average.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 04 / Rotterdam Building Heights</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script src="../../assets/js/viz.js"></script>
+<script>
+var F = Viz.fmt, E = Viz.esc;
+var DIST = [
+  {b:'0-5 m',n:203},{b:'5-10 m',n:207},{b:'10-15 m',n:371},{b:'15-20 m',n:740},
+  {b:'20-30 m',n:144},{b:'30-50 m',n:37},{b:'50-100 m',n:31},{b:'100 m+',n:7}
+];
+var ERA = [
+  {e:'pre-1940',  n:906, median:16.00, mean:14.73, max:54.57},
+  {e:'1940-1980', n:440, median:15.51, mean:15.82, max:73.30},
+  {e:'1980-2000', n:270, median:11.44, mean:15.21, max:103.38},
+  {e:'2000+',     n:124, median:11.82, mean:22.60, max:158.31}
+];
+var TALL = [
+  {id:'0599100000754173',y:2011,h:158.3,a:3088},
+  {id:'0599100100015923',y:2019,h:103.7,a:542},
+  {id:'0599100000702531',y:2004,h:103.6,a:2482},
+  {id:'0599100000701103',y:1996,h:103.4,a:1519},
+  {id:'0599100000753288',y:2009,h:103.3,a:3710},
+  {id:'0599100100004790',y:2013,h:102.4,a:2781}
+];
+var TOTAL = 1740;
+
+(function() {
+  var max = 740;
+  document.getElementById('dist-bars').innerHTML = DIST.map(function(d) {
+    return '<div class="bar-row"><span class="bar-lab">' + E(d.b) + '</span>' +
+      '<div class="bar-track"><div class="bar-fill" data-w="' + (d.n/max*100) + '%" data-tip-title="' + E(d.b) +
+      '" data-tip-rows=\'' + JSON.stringify([{k:'Buildings',v:String(d.n)},{k:'Share',v:F(d.n/TOTAL*100,1)+'%'}]) +
+      '\'></div></div><span class="bar-val">' + d.n + '</span></div>';
+  }).join('');
+  document.getElementById('tv-dist-body').innerHTML = DIST.map(function(d) {
+    return '<tr><td>' + E(d.b) + '</td><td class="num">' + d.n + '</td><td class="num">' + F(d.n/TOTAL*100,1) + '%</td></tr>';
+  }).join('');
+
+  var emax = 160;
+  document.getElementById('era-bars').innerHTML = ERA.map(function(d) {
+    var tip = JSON.stringify([{k:'Buildings',v:String(d.n)},{k:'Median',v:F(d.median,1)+' m'},{k:'Mean',v:F(d.mean,1)+' m'},{k:'Tallest',v:F(d.max,1)+' m'}]);
+    return '<div class="bar-row"><span class="bar-lab">' + E(d.e) + '</span>' +
+      '<div class="bar-track bar-group">' +
+        '<div class="bar-fill" data-w="' + (d.median/emax*100) + '%" data-tip-title="' + E(d.e) + '" data-tip-rows=\'' + tip + '\'></div>' +
+        '<div class="bar-fill s2" data-w="' + (d.max/emax*100) + '%" data-tip-title="' + E(d.e) + '" data-tip-rows=\'' + tip + '\'></div>' +
+      '</div><span class="bar-val">' + F(d.max,0) + ' m</span></div>';
+  }).join('');
+  document.getElementById('tv-era-body').innerHTML = ERA.map(function(d) {
+    return '<tr><td>' + E(d.e) + '</td><td class="num">' + d.n + '</td><td class="num">' + F(d.median,2) +
+      '</td><td class="num">' + F(d.mean,2) + '</td><td class="num">' + F(d.max,2) + '</td></tr>';
+  }).join('');
+  document.getElementById('tall-body').innerHTML = TALL.map(function(d) {
+    return '<tr><td class="mono" style="font-size:11px">' + E(d.id) + '</td><td class="num">' + d.y +
+      '</td><td class="num">' + F(d.h,1) + ' m</td><td class="num">' + d.a.toLocaleString('en-GB') + ' m&sup2;</td></tr>';
+  }).join('');
+})();
+
+(function() {
+  var TOKEN = 'pk.REDACTED_MAPBOX_TOKEN';
+  var RAMP = ['#0d366b','#184f95','#256abf','#3987e5','#6da7ec','#9ec5f4','#cde2fb'];
+  var STOPS = [0,8,15,22,40,80,140];
+  var ERAC = {pre:'#3987e5',mid:'#d95926',late:'#199e70',new:'#c98500'};
+  var colorBy='height', minh=0, ready=false, map=null, FEATURES=null;
+
+  function readout(n,med,mx,a50) {
+    document.getElementById('readout').innerHTML =
+      '<div class="r"><div class="rv">'+n.toLocaleString('en-GB')+'</div><div class="rk">Shown</div></div>' +
+      '<div class="r"><div class="rv">'+F(med,1)+'<span style="font-size:.6em;opacity:.5"> m</span></div><div class="rk">Median</div></div>' +
+      '<div class="r"><div class="rv">'+F(mx,1)+'<span style="font-size:.6em;opacity:.5"> m</span></div><div class="rk">Tallest</div></div>' +
+      '<div class="r"><div class="rv">'+a50+'</div><div class="rk">Above 50 m</div></div>';
+  }
+  readout(1740,15.49,158.31,38);
+  function recount() {
+    if(!FEATURES) return;
+    var hs=FEATURES.filter(function(f){return f.properties.height_m>=minh;})
+      .map(function(f){return f.properties.height_m;}).sort(function(a,b){return a-b;});
+    if(!hs.length){readout(0,0,0,0);return;}
+    readout(hs.length,hs[Math.floor(hs.length/2)],hs[hs.length-1],hs.filter(function(h){return h>=50;}).length);
+  }
+  function colorExpr() {
+    if(colorBy==='height'){var e=['interpolate',['linear'],['get','height_m']];STOPS.forEach(function(s,i){e.push(s,RAMP[i]);});return e;}
+    return ['step',['get','bouwjaar'],ERAC.pre,1940,ERAC.mid,1980,ERAC.late,2000,ERAC.new];
+  }
+  if(!window.mapboxgl||!TOKEN){document.getElementById('map').style.display='none';document.getElementById('map-nokey').style.display='block';return;}
+  mapboxgl.accessToken=TOKEN;
+  map=new mapboxgl.Map({container:'map',style:'mapbox://styles/mapbox/dark-v11',center:[4.4823,51.9138],zoom:14.2,pitch:60,bearing:-22,antialias:true});
+  map.addControl(new mapboxgl.NavigationControl({visualizePitch:true}),'top-right');
+  map.on('error',function(){document.getElementById('map').style.display='none';document.getElementById('map-nokey').style.display='block';});
+  map.on('load',function(){
+    map.addSource('b',{type:'geojson',data:'data/buildings.geojson'});
+    map.addLayer({id:'b3d',type:'fill-extrusion',source:'b',filter:['>=',['get','height_m'],0],
+      paint:{'fill-extrusion-color':colorExpr(),'fill-extrusion-height':['get','height_m'],'fill-extrusion-base':0,'fill-extrusion-opacity':0.92}});
+    map.on('sourcedata',function(e){if(e.sourceId==='b'&&e.isSourceLoaded&&!FEATURES){FEATURES=map.querySourceFeatures('b');if(FEATURES.length)recount();}});
+    var pop=new mapboxgl.Popup({closeButton:false});
+    map.on('mousemove','b3d',function(e){
+      var p=e.features[0].properties;map.getCanvas().style.cursor='pointer';
+      pop.setLngLat(e.lngLat).setHTML('<div style="font-family:IBM Plex Mono,monospace;font-size:11px;line-height:1.8;color:#111;padding:2px 4px"><b>'+F(p.height_m,1)+' m</b><br>built '+p.bouwjaar+'</div>').addTo(map);
+    });
+    map.on('mouseleave','b3d',function(){map.getCanvas().style.cursor='';pop.remove();});
+    ready=true;
+  });
+  document.querySelectorAll('[data-color]').forEach(function(b){
+    b.addEventListener('click',function(){
+      document.querySelectorAll('[data-color]').forEach(function(x){x.removeAttribute('aria-pressed');});
+      b.setAttribute('aria-pressed','true');colorBy=b.dataset.color;
+      if(ready)map.setPaintProperty('b3d','fill-extrusion-color',colorExpr());
+    });
+  });
+  document.getElementById('minh').addEventListener('input',function(e){
+    minh=+e.target.value;document.getElementById('minh-v').textContent=minh+' m';
+    if(ready)map.setFilter('b3d',['>=',['get','height_m'],minh]);recount();
+  });
+})();
+Viz.init(document);
+</script>
+</body>
+</html>

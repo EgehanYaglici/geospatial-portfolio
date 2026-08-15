@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amsterdam Walking Accessibility | Egehan Yaglici</title>
+<meta name="description" content="Measuring how far you can actually walk in Amsterdam when water, rail corridors and motorways break straight-line assumptions. OSMnx pedestrian routing from 5 origins.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<style>
+:root { --accent: #3987e5; --accent-dim: rgba(57,135,229,0.15); --orange: #d95926; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px;
+}
+.hero-left .desc-sm {
+  font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Hero image */
+.hero-img {
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+.hero-img .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Figures */
+.divider { height: 1px; background: var(--rule); margin-block: 32px; }
+.fig-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(2, 1fr); } }
+.fig-cell {
+  padding: 16px 12px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-num.highlight { color: var(--orange); }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Map */
+#map { width: 100%; height: 480px; background: var(--surface-2); border: 1px solid var(--rule-strong); }
+@media (max-width: 700px) { #map { height: 340px; } }
+.map-nokey { display: none; padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; border: 1px solid var(--rule-strong); }
+.map-controls {
+  display: flex; align-items: center; gap: 18px; padding: 12px 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+}
+.segs { display: flex; border: 1px solid var(--rule-strong); }
+.segs button {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  padding: 7px 12px; color: var(--ink-3); border-right: 1px solid var(--rule-strong);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.segs button:last-child { border-right: none; }
+.segs button:hover { color: var(--ink); }
+.segs button[aria-pressed="true"] { color: #fff; background: var(--accent-dim); }
+.readout {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  border: 1px solid var(--rule-strong); border-top: none;
+}
+@media (max-width: 640px) { .readout { grid-template-columns: repeat(3, 1fr); } }
+.readout .r { padding: 12px 14px; border-right: 1px solid var(--rule); }
+.readout .r:last-child { border-right: none; }
+.readout .rv {
+  font-family: var(--mono); font-size: 1.1rem; color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.readout .rk {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 6px;
+}
+
+/* Notes */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 01</span>
+    <div class="nav-links"><a href="#map-section">Map</a><a href="#detour">Detour</a><a href="#decisions">Decisions</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left text + right preview -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 01 &middot; Network GIS</div>
+    <h1>Amsterdam Walking Accessibility</h1>
+    <p class="desc">Amsterdam is full of canals, rail corridors and motorways that you can't walk across. A circle on a map says everything within 800 m is reachable, but walking has to go around. This study measures the actual detour: how much further you really walk vs straight-line distance, using OSMnx pedestrian network routing from 5 origins across the city.</p>
+    <p class="desc" style="margin-top:10px">One in four nearby point pairs needs more than twice the straight-line distance on foot. The isochrone shapes reveal which neighbourhoods are well-connected and which are cut off by water and infrastructure.</p>
+    <div class="tags" style="margin-top:16px">
+      <span class="t">OSMnx</span><span class="t">NetworkX</span><span class="t">PostGIS</span><span class="t">GeoPandas</span><span class="t">Mapbox GL</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/isochrone-preview.png" alt="Dam Square walking isochrones, 5, 10 and 15 minute reach areas on Amsterdam's pedestrian network" loading="eager">
+  </figure>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num highlight">1.41<span class="u">x</span></div><div class="fig-label">Median detour</div></div>
+  <div class="fig-cell"><div class="fig-num">24.1<span class="u">%</span></div><div class="fig-label">Pairs above 2x</div></div>
+  <div class="fig-cell"><div class="fig-num">26.3<span class="u">x</span></div><div class="fig-label">Worst pair</div></div>
+  <div class="fig-cell"><div class="fig-num">156,436</div><div class="fig-label">Pairs sampled</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ISOCHRONE MAP EXPLORER -->
+<section id="map-section">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">Isochrone Explorer</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Walking isochrones show how far you can actually reach in 5, 10, and 15 minutes from each origin. The shapes are <b style="color:var(--ink)">not circles</b>. They follow the real pedestrian network, stopping at canals, rail lines and motorways. Notice how the shapes get pinched and irregular near water: that's the detour the canal forces. Switch origins to see how connectivity varies. <b style="color:var(--accent)">Dam Square</b> has frequent bridges and reaches far; <b style="color:var(--ink-3)">Sloterdijk</b> is boxed in by rail and reaches almost nothing.</p>
+  <div class="map-controls">
+    <span style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase">Origin</span>
+    <div class="segs" role="group" aria-label="Origin">
+      <button data-o="Amsterdam Centraal" aria-pressed="true">Centraal</button>
+      <button data-o="Dam Square">Dam</button>
+      <button data-o="Sloterdijk">Sloterdijk</button>
+      <button data-o="Amsterdam Zuid">Zuid</button>
+      <button data-o="Muiderpoort">Muiderpoort</button>
+    </div>
+    <span style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase;margin-left:8px">Overlay</span>
+    <div class="segs" role="group" aria-label="Overlay">
+      <button data-layer="none" aria-pressed="true">None</button>
+      <button data-layer="pois">POIs</button>
+      <button data-layer="transit">Transit</button>
+      <button data-layer="mapbox">Mapbox compare</button>
+    </div>
+  </div>
+  <div style="display:flex;gap:16px;align-items:center;padding:8px 0;font-family:var(--mono);font-size:10px;color:var(--ink-3)">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:3px;background:#199e70;display:inline-block"></span>5 min</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:3px;background:#3987e5;display:inline-block"></span>10 min</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:3px;background:#9085e9;display:inline-block"></span>15 min</span>
+    <span style="display:flex;align-items:center;gap:5px;margin-left:12px"><span style="width:8px;height:8px;border-radius:50%;background:#c98500;display:inline-block"></span>POIs</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:#d95926;display:inline-block"></span>Transit</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:0;border-top:2px dashed #d95926;display:inline-block"></span>Mapbox (larger)</span>
+  </div>
+  <div id="map"></div>
+  <div class="map-nokey" id="map-nokey">The interactive map needs a Mapbox access token. All figures are computed offline.</div>
+  <div class="readout" id="readout"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DETOUR DISTRIBUTION -->
+<section id="detour">
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Detour distribution</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Network distance divided by straight-line distance for 156,436 sampled pairs. The tail is where water, rail corridors and the ring motorway force long detours. The canal ring has fewer extreme detours because its grid is denser and bridges are frequent.</p>
+  <div class="chart">
+    <div class="chart-head">
+      <span class="chart-title">Detour ratio distribution</span>
+      <button class="tv-btn" data-tableview="tv-detour" data-label-show="Table" data-label-hide="Hide">Table</button>
+    </div>
+    <div class="legend">
+      <span class="legend-i"><span class="legend-s" style="background:var(--series-1)"></span>Whole city</span>
+      <span class="legend-i"><span class="legend-s" style="background:var(--series-2)"></span>Canal ring</span>
+    </div>
+    <div class="bars" id="detour-bars" style="--barlabel:86px"></div>
+  </div>
+  <div class="tv mt16" id="tv-detour" hidden>
+    <div class="tbl-wrap"><table class="data">
+      <thead><tr><th>Detour ratio</th><th>City pairs</th><th>City share</th><th>Ring pairs</th><th>Ring share</th></tr></thead>
+      <tbody id="tv-detour-body"></tbody></table></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- AMENITY ACCESS -->
+<section>
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Amenity access</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Same ten minutes, different city. Sloterdijk reaches zero supermarkets in a 65 ha area. Muiderpoort reaches ten in a smaller 57 ha area. Reachable area is not access. What matters is what lies inside the isochrone.</p>
+  <div class="chart">
+    <div class="chart-head">
+      <span class="chart-title">Reachable within 10 min walk</span>
+      <button class="tv-btn" data-tableview="tv-ineq" data-label-show="Table" data-label-hide="Hide">Table</button>
+    </div>
+    <div style="margin:10px 0 14px;">
+      <div class="segs" role="group" aria-label="Amenity" style="max-width:420px;">
+        <button data-am="supermarkets" aria-pressed="true">Supermarkets</button>
+        <button data-am="pharmacies">Pharmacies</button>
+        <button data-am="transit_stops">Transit</button>
+        <button data-am="isochrone_area_ha">Area (ha)</button>
+      </div>
+    </div>
+    <div class="bars" id="ineq-bars" style="--barlabel:148px"></div>
+  </div>
+  <div class="tv mt16" id="tv-ineq" hidden>
+    <div class="tbl-wrap"><table class="data">
+      <thead><tr><th>Origin</th><th>Area ha</th><th>Supermkt</th><th>Pharm</th><th>Schools</th><th>Cafes</th><th>Transit</th><th>Parks</th></tr></thead>
+      <tbody id="tv-ineq-body"></tbody></table></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- MODEL COMPARISON -->
+<section>
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Model comparison</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Mapbox returns consistently larger areas. Agreement (intersection over union) is highest in the dense centre and collapses at the periphery where Mapbox routes along arterials the pedestrian graph excludes. Running a second model establishes the size of modelling uncertainty.</p>
+  <div class="chart">
+    <div class="chart-head">
+      <span class="chart-title">Reachable area, 10 min walk</span>
+      <button class="tv-btn" data-tableview="tv-cmp" data-label-show="Table" data-label-hide="Hide">Table</button>
+    </div>
+    <div class="legend">
+      <span class="legend-i"><span class="legend-s" style="background:var(--series-1)"></span>OSMnx</span>
+      <span class="legend-i"><span class="legend-s" style="background:var(--series-2)"></span>Mapbox API</span>
+    </div>
+    <div class="bars" id="cmp-bars" style="--barlabel:148px"></div>
+  </div>
+  <div class="tv mt16" id="tv-cmp" hidden>
+    <div class="tbl-wrap"><table class="data">
+      <thead><tr><th>Origin</th><th>Minutes</th><th>OSMnx ha</th><th>Mapbox ha</th><th>Mapbox larger</th><th>IoU</th></tr></thead>
+      <tbody id="tv-cmp-body"></tbody></table></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DECISIONS & LIMITS -->
+<section id="decisions">
+  <div class="sh"><span class="sh-no">05</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Routing</div><div class="mn-v"><b>Network distance, not buffers.</b> A buffer would be one line of code and wrong for one pair in four.</div></div>
+      <div class="mn"><div class="mn-k">Projection</div><div class="mn-v"><b>EPSG:28992 for every measurement.</b> Areas computed in RD New so hectares mean hectares. Only the final export is WGS84.</div></div>
+      <div class="mn"><div class="mn-k">Compute split</div><div class="mn-v"><b>Analysis offline, browser for display only.</b> Amenity counts run as indexed containment queries in PostGIS. The page loads finished GeoJSON.</div></div>
+      <div class="mn"><div class="mn-k">Buffer width</div><div class="mn-v"><b>15 m dissolve buffer.</b> Wide enough to merge street sides, narrow enough not to jump a canal.</div></div>
+      <div class="mn"><div class="mn-k">Validation</div><div class="mn-v"><b>A second, independent model.</b> Running the same origins through Mapbox establishes the size of modelling uncertainty.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Speed model</div><div class="mn-v">Single constant 4.8 km/h. Real speed varies with age, gradient, load and crowding.</div></div>
+      <div class="mn"><div class="mn-k">Crossings</div><div class="mn-v">Traffic signal waits and level changes are not modelled. This is why OSMnx areas are systematically smaller than Mapbox.</div></div>
+      <div class="mn"><div class="mn-k">Ferries</div><div class="mn-v">IJ ferries are free and frequent but absent from the walking graph. North-south extreme detours overstate the real barrier.</div></div>
+      <div class="mn"><div class="mn-k">Data</div><div class="mn-v">OSM pedestrian coverage is uneven. Private courtyards and recent infrastructure may be missing.</div></div>
+      <div class="mn"><div class="mn-k">Amenities</div><div class="mn-v">POI counts inherit OSM tagging quality. Transit stops are near-complete; cafe coverage skews toward the centre.</div></div>
+      <div class="mn"><div class="mn-k">Snapshot</div><div class="mn-v">Single point-in-time extract. Bridge closures, new footpaths and construction detours are not represented.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 01 / Amsterdam Walking Accessibility</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script src="../../assets/js/viz.js"></script>
+<script>
+var F = Viz.fmt, E = Viz.esc;
+
+/* outputs/tables/detour_ratio.json */
+var DETOUR = {
+  bins: ['1 to 1.25x','1.25 to 1.5x','1.5 to 2x','2 to 3x','3 to 5x','5 to 10x','over 10x'],
+  city: [
+    {count:14075, pct:23.46}, {count:20335, pct:33.90}, {count:10774, pct:17.96},
+    {count:7682,  pct:12.81}, {count:4069,  pct:6.78},  {count:2246,  pct:3.74},
+    {count:464,   pct:0.77}
+  ],
+  ring: [
+    {count:30128, pct:31.24}, {count:36086, pct:37.42}, {count:20435, pct:21.19},
+    {count:7183,  pct:7.45},  {count:2200,  pct:2.28},  {count:284,   pct:0.29},
+    {count:0,     pct:0.00}
+  ]
+};
+
+/* outputs/tables/accessibility_stats.csv, 10 minute rows */
+var STATS10 = [
+  {origin:'Amsterdam Centraal', area:78.25,  supermarkets:6,  pharmacies:2, schools:0,  cafes:60,  transit_stops:40, parks:0},
+  {origin:'Dam Square',         area:106.96, supermarkets:9,  pharmacies:2, schools:0,  cafes:118, transit_stops:40, parks:2},
+  {origin:'Sloterdijk',         area:65.49,  supermarkets:0,  pharmacies:0, schools:0,  cafes:2,   transit_stops:27, parks:2},
+  {origin:'Amsterdam Zuid',     area:59.74,  supermarkets:2,  pharmacies:1, schools:1,  cafes:14,  transit_stops:27, parks:5},
+  {origin:'Muiderpoort',        area:56.80,  supermarkets:10, pharmacies:3, schools:6,  cafes:10,  transit_stops:23, parks:1}
+];
+
+/* full 5/10/15 readouts for the map explorer */
+var STATS_ALL = {
+  'Amsterdam Centraal': {5:[22.61,0,1,27,0], 10:[78.25,6,2,40,0],  15:[162.02,12,3,66,2]},
+  'Dam Square':         {5:[29.11,2,1,16,1], 10:[106.96,9,2,40,2], 15:[220.15,16,3,73,2]},
+  'Sloterdijk':         {5:[21.53,0,0,22,0], 10:[65.49,0,0,27,2],  15:[119.47,0,0,35,2]},
+  'Amsterdam Zuid':     {5:[18.38,1,0,11,0], 10:[59.74,2,1,27,5],  15:[142.81,3,1,43,5]},
+  'Muiderpoort':        {5:[11.89,1,0,5,0],  10:[56.80,10,3,23,1], 15:[133.23,18,4,49,3]}
+};
+
+/* outputs/tables/osmnx_mapbox_comparison.csv */
+var CMP = [
+  {origin:'Amsterdam Centraal', t:5,  osmnx:22.61,  mapbox:30.65,  iou:0.729},
+  {origin:'Amsterdam Centraal', t:10, osmnx:78.25,  mapbox:112.96, iou:0.691},
+  {origin:'Amsterdam Centraal', t:15, osmnx:162.02, mapbox:247.53, iou:0.653},
+  {origin:'Amsterdam Zuid',     t:5,  osmnx:18.38,  mapbox:28.65,  iou:0.627},
+  {origin:'Amsterdam Zuid',     t:10, osmnx:59.74,  mapbox:118.42, iou:0.496},
+  {origin:'Amsterdam Zuid',     t:15, osmnx:142.81, mapbox:289.51, iou:0.493},
+  {origin:'Dam Square',         t:5,  osmnx:29.11,  mapbox:33.03,  iou:0.700},
+  {origin:'Dam Square',         t:10, osmnx:106.96, mapbox:133.29, iou:0.720},
+  {origin:'Dam Square',         t:15, osmnx:220.15, mapbox:305.45, iou:0.704},
+  {origin:'Muiderpoort',        t:5,  osmnx:11.89,  mapbox:43.28,  iou:0.275},
+  {origin:'Muiderpoort',        t:10, osmnx:56.80,  mapbox:152.01, iou:0.374},
+  {origin:'Muiderpoort',        t:15, osmnx:133.23, mapbox:339.20, iou:0.393},
+  {origin:'Sloterdijk',         t:5,  osmnx:21.53,  mapbox:30.60,  iou:0.640},
+  {origin:'Sloterdijk',         t:10, osmnx:65.49,  mapbox:127.81, iou:0.510},
+  {origin:'Sloterdijk',         t:15, osmnx:119.47, mapbox:295.76, iou:0.403}
+];
+
+/* ---------- Chart 1: detour distribution ---------- */
+(function () {
+  var host = document.getElementById('detour-bars');
+  var max = 0;
+  DETOUR.city.concat(DETOUR.ring).forEach(function (d) { if (d.pct > max) max = d.pct; });
+  var html = '';
+  DETOUR.bins.forEach(function (b, i) {
+    var c = DETOUR.city[i], r = DETOUR.ring[i];
+    html += '<div class="bar-row">' +
+      '<span class="bar-lab mono" style="font-size:11.5px">' + E(b) + '</span>' +
+      '<div class="bar-track bar-group">' +
+        '<div class="bar-fill" data-w="' + (c.pct / max * 100) + '%"' +
+          ' data-tip-title="' + E(b) + '"' +
+          " data-tip-rows='" + JSON.stringify([
+            {k:'Whole city', v:F(c.pct,1)+'%  ('+c.count.toLocaleString('en-GB')+' pairs)', color:'#3987e5'}
+          ]) + "'></div>" +
+        '<div class="bar-fill s2" data-w="' + (r.pct / max * 100) + '%"' +
+          ' data-tip-title="' + E(b) + '"' +
+          " data-tip-rows='" + JSON.stringify([
+            {k:'Canal ring', v:F(r.pct,1)+'%  ('+r.count.toLocaleString('en-GB')+' pairs)', color:'#d95926'}
+          ]) + "'></div>" +
+      '</div>' +
+      '<span class="bar-val">' + F(c.pct,1) + '%</span>' +
+    '</div>';
+  });
+  host.innerHTML = html;
+
+  document.getElementById('tv-detour-body').innerHTML = DETOUR.bins.map(function (b, i) {
+    return '<tr><td>' + E(b) + '</td>' +
+      '<td class="num">' + DETOUR.city[i].count.toLocaleString('en-GB') + '</td>' +
+      '<td class="num">' + F(DETOUR.city[i].pct,2) + '%</td>' +
+      '<td class="num">' + DETOUR.ring[i].count.toLocaleString('en-GB') + '</td>' +
+      '<td class="num">' + F(DETOUR.ring[i].pct,2) + '%</td></tr>';
+  }).join('');
+})();
+
+/* ---------- Chart 2: amenities within 10 min ---------- */
+(function () {
+  var host = document.getElementById('ineq-bars');
+  var key = 'supermarkets';
+
+  function draw() {
+    var vals = STATS10.map(function (d) { return key === 'isochrone_area_ha' ? d.area : d[key]; });
+    var max = Math.max.apply(null, vals) || 1;
+    var rows = STATS10.map(function (d, i) { return {d: d, v: vals[i]}; })
+                      .sort(function (a, b) { return b.v - a.v; });
+    host.innerHTML = rows.map(function (r) {
+      var pct = r.v / max * 100;
+      return '<div class="bar-row">' +
+        '<span class="bar-lab">' + E(r.d.origin) + '</span>' +
+        '<div class="bar-track">' +
+          '<div class="bar-fill" data-w="' + Math.max(pct, r.v > 0 ? 1.2 : 0) + '%"' +
+            ' data-tip-title="' + E(r.d.origin) + ', 10 min walk"' +
+            " data-tip-rows='" + JSON.stringify([
+              {k:'Reachable area', v: F(r.d.area,1) + ' ha'},
+              {k:'Supermarkets',   v: String(r.d.supermarkets)},
+              {k:'Pharmacies',     v: String(r.d.pharmacies)},
+              {k:'Schools',        v: String(r.d.schools)},
+              {k:'Transit stops',  v: String(r.d.transit_stops)}
+            ]) + "'></div>" +
+        '</div>' +
+        '<span class="bar-val">' + (key === 'isochrone_area_ha' ? F(r.v,1) : r.v) + '</span>' +
+      '</div>';
+    }).join('');
+    Viz.init(host);
+  }
+  draw();
+
+  document.querySelectorAll('[data-am]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-am]').forEach(function (x) { x.removeAttribute('aria-pressed'); });
+      b.setAttribute('aria-pressed', 'true');
+      key = b.dataset.am;
+      draw();
+    });
+  });
+
+  document.getElementById('tv-ineq-body').innerHTML = STATS10.map(function (d) {
+    return '<tr><td>' + E(d.origin) + '</td><td class="num">' + F(d.area,1) + '</td>' +
+      '<td class="num">' + d.supermarkets + '</td><td class="num">' + d.pharmacies + '</td>' +
+      '<td class="num">' + d.schools + '</td><td class="num">' + d.cafes + '</td>' +
+      '<td class="num">' + d.transit_stops + '</td><td class="num">' + d.parks + '</td></tr>';
+  }).join('');
+})();
+
+/* ---------- Chart 3: OSMnx vs Mapbox at 10 min ---------- */
+(function () {
+  var host = document.getElementById('cmp-bars');
+  var rows = CMP.filter(function (d) { return d.t === 10; })
+                .sort(function (a, b) { return b.mapbox - a.mapbox; });
+  var max = Math.max.apply(null, rows.map(function (d) { return d.mapbox; }));
+  host.innerHTML = rows.map(function (d) {
+    var larger = (d.mapbox / d.osmnx - 1) * 100;
+    var tipRows = JSON.stringify([
+      {k:'OSMnx',  v:F(d.osmnx,1) + ' ha',  color:'#3987e5'},
+      {k:'Mapbox', v:F(d.mapbox,1) + ' ha', color:'#d95926'},
+      {k:'Mapbox larger by', v:F(larger,0) + '%'},
+      {k:'IoU', v:F(d.iou,2)}
+    ]);
+    return '<div class="bar-row">' +
+      '<span class="bar-lab">' + E(d.origin) + '</span>' +
+      '<div class="bar-track bar-group">' +
+        '<div class="bar-fill"    data-w="' + (d.osmnx / max * 100) + '%" data-tip-title="' + E(d.origin) + ', 10 min" data-tip-rows=\'' + tipRows + '\'></div>' +
+        '<div class="bar-fill s2" data-w="' + (d.mapbox / max * 100) + '%" data-tip-title="' + E(d.origin) + ', 10 min" data-tip-rows=\'' + tipRows + '\'></div>' +
+      '</div>' +
+      '<span class="bar-val">IoU ' + F(d.iou,2) + '</span>' +
+    '</div>';
+  }).join('');
+
+  document.getElementById('tv-cmp-body').innerHTML = CMP.map(function (d) {
+    return '<tr><td>' + E(d.origin) + '</td><td class="num">' + d.t + '</td>' +
+      '<td class="num">' + F(d.osmnx,1) + '</td><td class="num">' + F(d.mapbox,1) + '</td>' +
+      '<td class="num">' + F((d.mapbox / d.osmnx - 1) * 100, 0) + '%</td>' +
+      '<td class="num">' + F(d.iou,3) + '</td></tr>';
+  }).join('');
+})();
+
+/* ---------- Map explorer ---------- */
+(function () {
+  var TOKEN = 'pk.REDACTED_MAPBOX_TOKEN';
+  var current = 'Amsterdam Centraal', band = 10;
+  var COLORS = {5: '#199e70', 10: '#3987e5', 15: '#9085e9'};
+  var CENTERS = {
+    'Amsterdam Centraal': [4.9003, 52.3791],
+    'Dam Square': [4.8936, 52.3731],
+    'Sloterdijk': [4.8378, 52.3890],
+    'Amsterdam Zuid': [4.8722, 52.3390],
+    'Muiderpoort': [4.9391, 52.3611]
+  };
+
+  var READ = ['Reachable', 'Supermarkets', 'Pharmacies', 'Transit stops', 'Parks'];
+  function readout() {
+    var v = STATS_ALL[current][band];
+    document.getElementById('readout').innerHTML = READ.map(function (k, i) {
+      var val = i === 0 ? F(v[0], 1) + '<span style="font-size:.6em;color:var(--ink-3)"> ha</span>' : v[i];
+      return '<div class="r"><div class="rv">' + val + '</div><div class="rk">' + E(k) + '</div></div>';
+    }).join('');
+  }
+  readout();
+
+  var map = null, ready = false;
+  if (!window.mapboxgl || !TOKEN) {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('map-nokey').style.display = 'block';
+    return;
+  }
+  mapboxgl.accessToken = TOKEN;
+  current = 'Dam Square';
+  document.querySelectorAll('[data-o]').forEach(function(x){x.removeAttribute('aria-pressed');});
+  document.querySelector('[data-o="Dam Square"]').setAttribute('aria-pressed','true');
+  readout();
+  map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/dark-v11',
+    center: CENTERS['Dam Square'], zoom: 13.5, attributionControl: true
+  });
+  map.addControl(new mapboxgl.NavigationControl({showCompass: false}), 'top-right');
+  map.on('error', function () {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('map-nokey').style.display = 'block';
+  });
+  map.on('load', function () {
+    map.addSource('iso', {type: 'geojson', data: 'data/isochrones_osmnx.geojson'});
+    map.addSource('iso-mapbox', {type: 'geojson', data: 'data/isochrones_mapbox.geojson'});
+    map.addSource('pois', {type: 'geojson', data: 'data/pois.geojson'});
+    map.addSource('transit', {type: 'geojson', data: 'data/transit.geojson'});
+
+    [15, 10, 5].forEach(function (t) {
+      map.addLayer({
+        id: 'iso-mbx-' + t, type: 'line', source: 'iso-mapbox',
+        filter: ['all', ['==', ['get', 'origin_name'], current], ['==', ['get', 'time_minutes'], t]],
+        paint: {'line-color': '#d95926', 'line-width': 1.2, 'line-dasharray': [3, 2], 'line-opacity': 0.6},
+        layout: {visibility: 'none'}
+      });
+      map.addLayer({
+        id: 'iso-' + t, type: 'fill', source: 'iso',
+        filter: ['all', ['==', ['get', 'origin_name'], current], ['==', ['get', 'time_minutes'], t]],
+        paint: {'fill-color': COLORS[t], 'fill-opacity': 0.18}
+      });
+      map.addLayer({
+        id: 'isoline-' + t, type: 'line', source: 'iso',
+        filter: ['all', ['==', ['get', 'origin_name'], current], ['==', ['get', 'time_minutes'], t]],
+        paint: {'line-color': COLORS[t], 'line-width': 2, 'line-opacity': 0.9}
+      });
+    });
+
+    map.addLayer({
+      id: 'pois-layer', type: 'circle', source: 'pois',
+      paint: {'circle-radius': 3.5, 'circle-color': '#c98500', 'circle-opacity': 0.8, 'circle-stroke-width': 0.5, 'circle-stroke-color': '#000'},
+      layout: {visibility: 'none'}
+    });
+    map.addLayer({
+      id: 'transit-layer', type: 'circle', source: 'transit',
+      paint: {'circle-radius': 4, 'circle-color': '#d95926', 'circle-opacity': 0.8, 'circle-stroke-width': 0.5, 'circle-stroke-color': '#000'},
+      layout: {visibility: 'none'}
+    });
+
+    ready = true;
+    refresh();
+  });
+
+  function refresh() {
+    if (!ready) return;
+    [5, 10, 15].forEach(function (t) {
+      var f = ['all', ['==', ['get', 'origin_name'], current], ['==', ['get', 'time_minutes'], t]];
+      map.setFilter('iso-' + t, f);
+      map.setFilter('isoline-' + t, f);
+      map.setFilter('iso-mbx-' + t, f);
+    });
+    map.flyTo({center: CENTERS[current], zoom: 13.5, duration: 800});
+  }
+
+  document.querySelectorAll('[data-o]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-o]').forEach(function (x) { x.removeAttribute('aria-pressed'); });
+      b.setAttribute('aria-pressed', 'true');
+      current = b.dataset.o;
+      readout(); refresh();
+    });
+  });
+  document.querySelectorAll('[data-t]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-t]').forEach(function (x) { x.removeAttribute('aria-pressed'); });
+      b.setAttribute('aria-pressed', 'true');
+      band = +b.dataset.t;
+      readout();
+    });
+  });
+  document.querySelectorAll('[data-layer]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-layer]').forEach(function (x) { x.removeAttribute('aria-pressed'); });
+      b.setAttribute('aria-pressed', 'true');
+      if (!ready) return;
+      var layer = b.dataset.layer;
+      map.setLayoutProperty('pois-layer', 'visibility', layer === 'pois' ? 'visible' : 'none');
+      map.setLayoutProperty('transit-layer', 'visibility', layer === 'transit' ? 'visible' : 'none');
+      [5, 10, 15].forEach(function(t) {
+        map.setLayoutProperty('iso-mbx-' + t, 'visibility', layer === 'mapbox' ? 'visible' : 'none');
+      });
+    });
+  });
+})();
+
+Viz.init(document);
+
+</script>
+</body>
+</html>
