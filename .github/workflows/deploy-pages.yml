@@ -17,6 +17,12 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Inject Mapbox token
+        env:
+          MAPBOX_TOKEN: ${{ secrets.MAPBOX_ACCESS_TOKEN }}
+        run: |
+          find site -name "*.html" -exec sed -i "s|__MAPBOX_TOKEN__|${MAPBOX_TOKEN}|g" {} \;
+
       - name: Deploy site/ to gh-pages
         uses: peaceiris/actions-gh-pages@v4
         with:
