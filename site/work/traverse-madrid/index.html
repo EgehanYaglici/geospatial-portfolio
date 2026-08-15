@@ -5,7 +5,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Traverse: Madrid Traffic Scenario Lab | Egehan Yağlıcı</title>
-<meta name="description" content="Concept traffic scenario lab for central Madrid. Design a road closure or speed-limit change on the map, run a SUMO microsimulation, and read the KPI difference against a calibrated baseline in under two minutes.">
+<meta name="description" content="Concept traffic scenario lab for central Madrid. Design a road closure or speed-limit change on the map, run a SUMO microsimulation, and read the KPI difference against a fixed baseline in under two minutes.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
@@ -131,7 +131,7 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2)
       </div>
       <h1>Traverse: Madrid Traffic Scenario Lab</h1>
       <p class="desc">
-        A concept web tool for traffic scenario analysis in central Madrid. Pick any road on the map, apply a change such as a speed reduction or lane restriction, and run a SUMO microsimulation. Results appear in a comparison panel that shows how every fleet-level KPI shifted against a calibrated baseline.
+        A concept web tool for traffic scenario analysis in central Madrid. Pick any road on the map, apply a change such as a speed reduction or lane restriction, and run a SUMO microsimulation. Results appear in a comparison panel that shows how every fleet-level KPI shifted against a fixed baseline.
       </p>
       <p class="desc">
         Built as a personal research project to explore what a low-friction scenario lab might look like for a city with open sensor data. Not a production tool.
@@ -174,7 +174,7 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2)
     <div class="metric">
       <div class="metric-k">Vehicles simulated</div>
       <div class="metric-v">289</div>
-      <div class="metric-u">calibrated to INFORMO</div>
+      <div class="metric-u">scaled to INFORMO</div>
     </div>
   </div>
 
@@ -182,7 +182,7 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2)
 
   <div class="sh"><span class="sh-no">01</span><span class="sh-title">What it does</span></div>
   <p class="body-text">
-    The idea is simple: instead of writing a permit application to understand what closing a road might do to traffic, you click the road on the map, add a patch to a scenario, and run the simulator. The backend takes the standard SUMO network for central Madrid, applies whatever changes you described (speed limits, lane counts, closures), regenerates vehicle routes calibrated to the current INFORMO density readings, and runs a one-hour microsimulation. The results panel shows baseline versus scenario side by side.
+    The idea is simple: instead of writing a permit application to understand what closing a road might do to traffic, you click the road on the map, add a patch to a scenario, and run the simulator. The backend takes the standard SUMO network for central Madrid, applies whatever changes you described (speed limits, lane counts, closures), regenerates vehicle routes scaled to the current INFORMO density readings, and runs a one-hour microsimulation. The results panel shows baseline versus scenario side by side.
   </p>
   <p class="body-text">
     The SUMO network is built from an OpenStreetMap extract of the Gran Via corridor using netconvert, so every simulated edge corresponds to a real street. Vehicle intensity is drawn from 4,893 Madrid loop-detector measurement points in the INFORMO XML feed, so the baseline trip count is anchored to observed data rather than synthetic demand.
@@ -226,7 +226,7 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2)
   </div>
 
   <p class="body-text" style="margin-top:16px">
-    The <code>.net.xml</code> is pre-built from the OSM file and cached on disk. Each run copies it into an isolated temp directory. Scenario patches are applied via Python ElementTree: for speed changes, every <code>&lt;lane&gt;</code> child element of matching edges gets a new <code>speed</code> attribute (the compiled network stores speed on lanes, not on the edge element). For lane reductions, excess <code>&lt;lane&gt;</code> elements are removed and all connection elements referencing deleted lane indices are clamped. After patching, <code>randomTrips.py --validate</code> generates calibrated O-D routes via duarouter. SUMO runs 3,600 simulated seconds at 1-second step resolution. Outputs are <code>tripinfo.xml</code> (per-vehicle KPIs) and <code>edge_data.xml</code> (5-minute interval measurements per edge). Both are parsed and stored in the database, then surfaced in the React comparison panel.
+    The <code>.net.xml</code> is pre-built from the OSM file and cached on disk. Each run copies it into an isolated temp directory. Scenario patches are applied via Python ElementTree: for speed changes, every <code>&lt;lane&gt;</code> child element of matching edges gets a new <code>speed</code> attribute (the compiled network stores speed on lanes, not on the edge element). For lane reductions, excess <code>&lt;lane&gt;</code> elements are removed and all connection elements referencing deleted lane indices are clamped. After patching, <code>randomTrips.py --validate</code> generates O-D routes via duarouter. SUMO runs 3,600 simulated seconds at 1-second step resolution. Outputs are <code>tripinfo.xml</code> (per-vehicle KPIs) and <code>edge_data.xml</code> (5-minute interval measurements per edge). Both are parsed and stored in the database, then surfaced in the React comparison panel.
   </p>
 
   <div class="rule"></div>
@@ -294,7 +294,7 @@ code { font-family: var(--mono); font-size: 11.5px; background: var(--surface-2)
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
       </div>
       <div class="feature-title">SUMO microsimulation</div>
-      <div class="feature-desc">eclipse-sumo 1.27.1 runs each scenario in an isolated temp directory. Route files are generated fresh per run and calibrated to the observed INFORMO density. A one-hour simulation completes in under two minutes on a MacBook.</div>
+      <div class="feature-desc">eclipse-sumo 1.27.1 runs each scenario in an isolated temp directory. Route files are generated fresh per run and scaled to the observed INFORMO density. A one-hour simulation completes in under two minutes on a MacBook.</div>
     </div>
     <div class="feature">
       <div class="feature-icon" style="background:rgba(16,185,129,0.15)">
