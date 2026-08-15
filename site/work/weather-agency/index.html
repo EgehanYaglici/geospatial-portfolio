@@ -37,7 +37,7 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 .live-btn:hover { background: rgba(57,135,229,0.2); border-color: rgba(57,135,229,0.5); }
 
 .hero-img { border: 1px solid var(--rule-strong); overflow: hidden; }
-.hero-img img.hero-img video { width: 100%; height: auto; display: block; }
+.hero-img img { width: 100%; height: auto; display: block; }
 .hero-img figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
 
 .rule { height: 1px; background: var(--rule); margin-block: 32px; }
@@ -48,29 +48,74 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 .body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
 .body-text + .body-text { margin-top: 10px; }
 
-.fig-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
-.fig-cell { border: 1px solid var(--rule-strong); padding: 14px 16px; }
-.fig-cell .fk { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
-.fig-cell .fv { font-size: 1.45rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
-.fig-cell .fu { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+/* Stats bar */
+.fig-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(2, 1fr); } }
+.fig-cell {
+  padding: 14px 12px; text-align: center;
+  border-right: 1px solid var(--rule-strong);
+}
+.fig-cell:last-child { border-right: none; }
+.fk { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.fv { font-size: 1.45rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.fu { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
 
-.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
-@media (max-width: 640px) { .img-grid { grid-template-columns: 1fr; } }
+/* Video demo */
+.video-wrap {
+  border: 1px solid var(--rule-strong); overflow: hidden; margin-top: 0;
+  background: #08090b;
+}
+.video-wrap video { width: 100%; display: block; }
+.video-wrap figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+/* Image boxes */
 .img-box { border: 1px solid var(--rule-strong); overflow: hidden; }
 .img-box img { width: 100%; height: auto; display: block; }
+.img-box video { width: 100%; display: block; }
 .img-box figcaption { font-size: 11px; color: var(--ink-3); padding: 7px 11px; border-top: 1px solid var(--rule); background: var(--surface-1); }
 
+/* Grids */
+.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .img-grid { grid-template-columns: 1fr; } }
+
+.img-grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .img-grid-3 { grid-template-columns: 1fr; } }
+@media (max-width: 860px) and (min-width: 641px) { .img-grid-3 { grid-template-columns: 1fr 1fr; } }
+
+.img-grid-6 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; }
+@media (max-width: 700px) { .img-grid-6 { grid-template-columns: 1fr 1fr; } }
+
+/* Broadcast template strip */
+.broadcast-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 14px; }
+@media (max-width: 640px) { .broadcast-strip { grid-template-columns: 1fr; } }
+.b-card { border: 1px solid var(--rule-strong); overflow: hidden; }
+.b-card img { width: 100%; height: auto; display: block; background: #000; }
+.b-card .b-label { font-family: var(--mono); font-size: 9.5px; letter-spacing: .05em; color: var(--ink-3); padding: 6px 10px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+/* Feature grid */
 .feat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 16px; max-width: 680px; }
 @media (max-width: 600px) { .feat-grid { grid-template-columns: 1fr; } }
 .feat { border: 1px solid var(--rule-strong); padding: 12px 14px; background: var(--surface-1); }
 .feat-k { font-family: var(--mono); font-size: 9.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--accent); margin-bottom: 5px; }
 .feat-v { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
 
+/* Stack */
 .stack-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
 .stack-chip { font-family: var(--mono); font-size: 10px; color: var(--ink-2); border: 1px solid var(--rule-strong); padding: 4px 10px; background: var(--surface-1); }
 
-.collab-note { margin-top: 24px; padding: 12px 16px; border: 1px solid var(--rule-strong); background: var(--surface-1); font-size: 12px; color: var(--ink-3); line-height: 1.6; }
-.collab-note b { color: var(--ink-2); }
+/* Layer label chips */
+.layer-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .07em; text-transform: uppercase;
+  color: var(--ink-3); padding: 4px 8px; background: var(--surface-1);
+  border-top: 1px solid var(--rule-strong); text-align: center;
+}
+
+.full-img { border: 1px solid var(--rule-strong); overflow: hidden; margin-top: 16px; }
+.full-img img { width: 100%; height: auto; display: block; }
+.full-img figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
 </style>
 </head>
 <body>
@@ -89,9 +134,9 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 
 <div class="hero-row">
   <div>
-    <div class="case-id">Client Work &middot; Web GIS / SaaS</div>
+    <div class="case-id">Client Work &middot; Broadcast SaaS</div>
     <h1>The Weather Agency<br>Graphics Engine</h1>
-    <p class="desc">Full-stack browser-based weather graphics platform for broadcasters and content creators. Real-time radar, satellite and observation layers over a Mapbox GL JS map, keyframe animation timeline, 4K export, OBS/vMix live streaming integration.</p>
+    <p class="desc">Full-stack browser-based weather graphics platform for TV broadcasters and content creators. Build animated weather graphics from live radar, satellite, and observation data, then export at 4K or stream live to OBS and vMix.</p>
     <p class="desc-sm">Live at <code>graphics.theweatheragency.com</code>.</p>
     <div class="tags">
       <span class="t">Vanilla JS</span>
@@ -105,34 +150,118 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
     <a class="live-btn" href="https://graphics.theweatheragency.com" target="_blank" rel="noopener">Live site ↗</a>
   </div>
   <figure class="hero-img">
-    <img src="data/app.png" alt="The Weather Agency, weather layer panel open">
-    <figcaption>Graphics editor, weather layer panel with radar, satellite and observation options</figcaption>
+    <img src="data/app.png" alt="The Weather Agency graphics editor with weather layer panel open" loading="eager">
+    <figcaption>Editor with weather layer panel — radar, satellite, observation layers stack on a Mapbox base</figcaption>
   </figure>
 </div>
-
-<div class="rule"></div>
 
 <div class="fig-row">
   <div class="fig-cell"><div class="fk">Export</div><div class="fv">4K</div><div class="fu">MP4 · PNG · JPG</div></div>
   <div class="fig-cell"><div class="fk">Data layers</div><div class="fv">40+</div><div class="fu">radar · sat · obs</div></div>
   <div class="fig-cell"><div class="fk">Streaming</div><div class="fv">OBS</div><div class="fu">vMix · virtual cam</div></div>
+  <div class="fig-cell"><div class="fk">Billing</div><div class="fv">Stripe</div><div class="fu">subscription · metered</div></div>
 </div>
 
-<div class="sh"><span class="sh-no">01</span><span class="sh-title">What it does</span></div>
-<p class="body-text">Users build a weather graphic by stacking layers onto a Mapbox map, live radar, multi-spectral satellite (infrared, visible, water vapour, GeoColor), surface temperatures, dew points, wind speeds with particle animation, then annotate with draw tools, text labels, and meteorological symbols. The animation engine sequences through time steps. The result exports to MP4 at up to 4K, or streams live via a virtual camera to OBS or vMix for broadcast.</p>
+<div class="rule"></div>
 
-<div class="img-grid">
+<!-- VIDEO DEMO -->
+<figure class="video-wrap">
+  <video autoplay muted loop playsinline preload="metadata">
+    <source src="data/demo.webm" type="video/webm">
+  </video>
+  <figcaption>Product demo — building a weather graphic, adding layers, setting the animation timeline, exporting</figcaption>
+</figure>
+
+<div class="rule"></div>
+
+<!-- SECTION 01: EDITOR -->
+<div class="sh"><span class="sh-no">01</span><span class="sh-title">The editor</span></div>
+<p class="body-text">Users stack weather layers onto a Mapbox GL JS canvas: live radar, multi-spectral satellite (infrared, visible, water vapour, GeoColor), surface temperatures, dew points, wind speed with particle animation. Draw tools, text labels, and a full meteorological symbol library sit above the map. The animation engine sequences time steps; export assembles an MP4 at up to 4K or frames it as a continuous stream via virtual camera.</p>
+
+<figure class="full-img">
+  <img src="data/graphics_engine.jpg" alt="Full graphics editor UI — layer panel, map, timeline, draw tools" loading="lazy">
+  <figcaption>Full editor view. Layer panel on the left, map canvas in the centre, draw/text tools in the toolbar.</figcaption>
+</figure>
+
+<div class="img-grid" style="margin-top:12px">
   <figure class="img-box">
-    <img src="data/layers.webp" alt="Layer menu, Weather Layer, Asset Catalog, Draw, Text, Animation Engine">
-    <figcaption>Layer system, Weather, Assets, Draw, Text, Animation Engine, Images</figcaption>
+    <img src="data/lp1.webp" alt="Editor showing weather layer controls and map" loading="lazy">
+    <figcaption>Layer panel — Weather, Assets, Draw, Text, Animation Engine, Images</figcaption>
   </figure>
   <figure class="img-box">
-    <img src="data/timeline.webp" alt="Weather layer time range controls, Live, 1h, 3h, 6h, 24h, 7d, Custom">
-    <figcaption>Time range controls, live to ±7 day forecast, per-layer interval and frame fetch</figcaption>
+    <img src="data/lp2.webp" alt="Animation timeline and time range controls" loading="lazy">
+    <figcaption>Timeline editor — frame sequence, keyframe tracks per layer, per-layer time interval</figcaption>
   </figure>
 </div>
 
-<div class="sh"><span class="sh-no">02</span><span class="sh-title">What I built</span></div>
+<div class="rule"></div>
+
+<!-- SECTION 02: WEATHER DATA LAYERS -->
+<div class="sh"><span class="sh-no">02</span><span class="sh-title">Weather data</span></div>
+<p class="body-text">More than 40 live data layers are available from the XWeather API, grouped by category. Each layer has its own time range selector — live through ±7-day forecast — and fetches the correct frame sequence per interval. Layers can be stacked in any order with individual opacity controls.</p>
+
+<div class="img-grid-3">
+  <div>
+    <figure class="img-box">
+      <img src="data/map_radar.png" alt="Live radar layer over US" loading="lazy">
+    </figure>
+    <div class="layer-label">Radar</div>
+  </div>
+  <div>
+    <figure class="img-box">
+      <img src="data/map_satellite.jpg" alt="GeoColor satellite layer" loading="lazy">
+    </figure>
+    <div class="layer-label">Satellite · GeoColor</div>
+  </div>
+  <div>
+    <figure class="img-box">
+      <img src="data/map_temp.jpg" alt="Surface temperature layer" loading="lazy">
+    </figure>
+    <div class="layer-label">Surface temperature</div>
+  </div>
+</div>
+
+<div class="img-grid" style="margin-top:12px">
+  <figure class="img-box">
+    <img src="data/lp3.webp" alt="Layer category selector showing available weather data types" loading="lazy">
+    <figcaption>Layer picker — 40+ categories, each with thumbnail preview, animation mode, and time range controls</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/lp4.webp" alt="Time range and forecast scrubbing UI" loading="lazy">
+    <figcaption>Per-layer time range — live, 1 h, 3 h, 6 h, 24 h, 7-day forecast, custom range</figcaption>
+  </figure>
+</div>
+
+<div class="rule"></div>
+
+<!-- SECTION 03: BROADCAST OUTPUT -->
+<div class="sh"><span class="sh-no">03</span><span class="sh-title">Broadcast output</span></div>
+<p class="body-text">The final product is broadcast-ready. A Format step locks the crop area; Export renders every frame at the target resolution and assembles the MP4. For live production, a virtual camera exposes the canvas directly to OBS or vMix — presenters can switch between city slides and live radar without leaving the broadcast chain. The template library ships with pre-built forecast layouts that studios can brand and reuse.</p>
+
+<figure class="full-img">
+  <img src="data/broadcast_engine.jpg" alt="Broadcast mode with city slide automation and virtual camera output" loading="lazy">
+  <figcaption>Broadcast mode — automated city slide sequence, virtual camera output, live data updates per slide</figcaption>
+</figure>
+
+<div class="broadcast-strip">
+  <div class="b-card">
+    <img src="data/t49_5day.png" alt="T49 Rebound 5-day forecast template output" loading="lazy">
+    <div class="b-label">T49 Rebound — 5-day forecast</div>
+  </div>
+  <div class="b-card">
+    <img src="data/t49_7day.png" alt="T49 Rebound 7-day forecast template output" loading="lazy">
+    <div class="b-label">T49 Rebound — 7-day forecast</div>
+  </div>
+  <div class="b-card">
+    <img src="data/t53_upper.png" alt="T53 upper third lower third broadcast graphic" loading="lazy">
+    <div class="b-label">T53 — upper third</div>
+  </div>
+</div>
+
+<div class="rule"></div>
+
+<!-- SECTION 04: WHAT I BUILT -->
+<div class="sh"><span class="sh-no">04</span><span class="sh-title">What I built</span></div>
 
 <div class="feat-grid">
   <div class="feat">
@@ -161,8 +290,22 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
   </div>
 </div>
 
-<div class="sh"><span class="sh-no">03</span><span class="sh-title">Stack</span></div>
-<p class="body-text">No framework, vanilla JS modules with a hand-rolled project state store. Frontend deployed to AWS CloudFront. All persistence through Supabase (auth + project saves). Stripe handles subscriptions.</p>
+<div class="img-grid" style="margin-top:16px">
+  <figure class="img-box">
+    <img src="data/lp5.webp" alt="Export panel with format, resolution and fps controls" loading="lazy">
+    <figcaption>Export panel — format crop area, resolution selector, frame rate, output queue</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/lp6.webp" alt="Auth and subscription plan selection screen" loading="lazy">
+    <figcaption>Subscription and auth — Supabase for accounts, Stripe for plan management and export credits</figcaption>
+  </figure>
+</div>
+
+<div class="rule"></div>
+
+<!-- SECTION 05: STACK -->
+<div class="sh"><span class="sh-no">05</span><span class="sh-title">Stack</span></div>
+<p class="body-text">No framework, vanilla JS modules with a hand-rolled project state store. Frontend deployed to AWS CloudFront. All persistence through Supabase (auth + project saves). Stripe handles subscriptions and metered export credits.</p>
 <div class="stack-row">
   <span class="stack-chip">Vanilla JS (ES modules)</span>
   <span class="stack-chip">Mapbox GL JS</span>
@@ -171,7 +314,6 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
   <span class="stack-chip">Supabase (auth + DB)</span>
   <span class="stack-chip">Stripe</span>
   <span class="stack-chip">AWS CloudFront + S3</span>
-  <span class="stack-chip">Figtree / JetBrains Mono</span>
 </div>
 
 <div style="height:64px"></div>
