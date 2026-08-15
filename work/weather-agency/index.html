@@ -174,36 +174,43 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 
 <div class="rule"></div>
 
-<!-- SECTION 01: EDITOR -->
-<div class="sh"><span class="sh-no">01</span><span class="sh-title">The editor</span></div>
-<p class="body-text">Users stack weather layers onto a Mapbox GL JS canvas: live radar, multi-spectral satellite (infrared, visible, water vapour, GeoColor), surface temperatures, dew points, wind speed with particle animation. Draw tools, text labels, and a full meteorological symbol library sit above the map. The animation engine sequences time steps; export assembles an MP4 at up to 4K or frames it as a continuous stream via virtual camera.</p>
-
-<figure class="full-img">
-  <img src="data/graphics_engine.jpg" alt="Full graphics editor UI — layer panel, map, timeline, draw tools" loading="lazy">
-  <figcaption>Full editor view. Layer panel on the left, map canvas in the centre, draw/text tools in the toolbar.</figcaption>
-</figure>
-
-<div class="img-grid" style="margin-top:12px">
-  <figure class="img-box">
-    <img src="data/lp1.webp" alt="Editor showing weather layer controls and map" loading="lazy">
-    <figcaption>Layer panel — Weather, Assets, Draw, Text, Animation Engine, Images</figcaption>
-  </figure>
-  <figure class="img-box">
-    <img src="data/lp2.webp" alt="Animation timeline and time range controls" loading="lazy">
-    <figcaption>Timeline editor — frame sequence, keyframe tracks per layer, per-layer time interval</figcaption>
-  </figure>
+<!-- FEATURES -->
+<div class="feat-grid">
+  <div class="feat">
+    <div class="feat-k">Map engine</div>
+    <div class="feat-v">Mapbox GL JS + MapsGL integration. Custom layer ordering, opacity controls, per-layer time scrubbing.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Animation timeline</div>
+    <div class="feat-v">Keyframe system with interpolation. Draw, symbol and banner assets each carry their own keyframe track.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Export pipeline</div>
+    <div class="feat-v">Frame capture at 29.97/25 fps, H.264 MP4 assembly, PNG/JPG stills. Format step locks the crop area before export.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">40+ data layers</div>
+    <div class="feat-v">XWeather API: radar, multi-spectral satellite, surface temps, dew point, wind particles, lightning, storm cells and more. Live through ±7-day forecast per layer.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Auth & billing</div>
+    <div class="feat-v">Supabase auth (Google OAuth + email). Stripe subscription plans with credit-based export usage metering.</div>
+  </div>
+  <div class="feat">
+    <div class="feat-k">Broadcast mode</div>
+    <div class="feat-v">Virtual camera output for OBS and vMix. Automated city slide templates with live data updates per slide.</div>
+  </div>
 </div>
 
 <div class="rule"></div>
 
-<!-- SECTION 02: WEATHER DATA LAYERS -->
-<div class="sh"><span class="sh-no">02</span><span class="sh-title">Weather data</span></div>
-<p class="body-text">More than 40 live data layers are available from the XWeather API, grouped by category. Each layer has its own time range selector — live through ±7-day forecast — and fetches the correct frame sequence per interval. Layers can be stacked in any order with individual opacity controls.</p>
+<!-- WEATHER DATA LAYERS -->
+<div class="sh"><span class="sh-no">01</span><span class="sh-title">Data layers</span></div>
 
 <div class="img-grid-3">
   <div>
     <figure class="img-box">
-      <img src="data/map_radar.png" alt="Live radar layer over US" loading="lazy">
+      <img src="data/map_radar.png" alt="Live radar layer" loading="lazy">
     </figure>
     <div class="layer-label">Radar</div>
   </div>
@@ -221,74 +228,20 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
   </div>
 </div>
 
-<div class="img-grid" style="margin-top:12px">
-  <figure class="img-box">
-    <img src="data/lp3.webp" alt="Layer category selector showing available weather data types" loading="lazy">
-    <figcaption>Layer picker — 40+ categories, each with thumbnail preview, animation mode, and time range controls</figcaption>
-  </figure>
-  <figure class="img-box">
-    <img src="data/lp4.webp" alt="Time range and forecast scrubbing UI" loading="lazy">
-    <figcaption>Per-layer time range — live, 1 h, 3 h, 6 h, 24 h, 7-day forecast, custom range</figcaption>
-  </figure>
-</div>
-
 <div class="rule"></div>
 
-<!-- SECTION 03: BROADCAST OUTPUT -->
-<div class="sh"><span class="sh-no">03</span><span class="sh-title">Broadcast output</span></div>
-<p class="body-text">A Format step locks the crop area; Export renders every frame at the target resolution and assembles the MP4. For live production, a virtual camera exposes the canvas directly to OBS or vMix — presenters can switch between city slides and live radar without leaving the broadcast chain. Templates include pre-built 5-day and 7-day forecast layouts, upper-third graphics, and a background system studios can brand and reuse.</p>
+<!-- BROADCAST OUTPUT -->
+<div class="sh"><span class="sh-no">02</span><span class="sh-title">Broadcast output</span></div>
+<p class="body-text">For live production, a virtual camera exposes the canvas directly to OBS or vMix. Presenters switch between city slides and live radar without leaving the broadcast chain. Pre-built templates cover 5-day and 7-day forecast layouts, upper-third graphics, and a branded background system.</p>
 
 <figure class="full-img">
   <img src="data/broadcast_engine.jpg" alt="Broadcast mode with city slide automation and virtual camera output" loading="lazy">
-  <figcaption>Broadcast mode — automated city slide sequence, virtual camera output, live data updates per slide</figcaption>
+  <figcaption>Broadcast mode — city slide sequence with live data, virtual camera output to OBS/vMix</figcaption>
 </figure>
 
 <div class="rule"></div>
 
-<!-- SECTION 04: WHAT I BUILT -->
-<div class="sh"><span class="sh-no">04</span><span class="sh-title">What I built</span></div>
-
-<div class="feat-grid">
-  <div class="feat">
-    <div class="feat-k">Map engine</div>
-    <div class="feat-v">Mapbox GL JS + MapsGL integration. Custom layer ordering, opacity controls, per-layer time scrubbing.</div>
-  </div>
-  <div class="feat">
-    <div class="feat-k">Animation timeline</div>
-    <div class="feat-v">Keyframe system with interpolation. Banner, symbol and draw assets each carry their own keyframe track. Export uses only the Format-selected area.</div>
-  </div>
-  <div class="feat">
-    <div class="feat-k">Export pipeline</div>
-    <div class="feat-v">Frame capture at 29.97/25 fps, H.264 MP4 assembly, PNG/JPG stills. Format step sets the crop area; Export is disabled until Format is set.</div>
-  </div>
-  <div class="feat">
-    <div class="feat-k">Layer data system</div>
-    <div class="feat-v">XWeather API integration for radar, satellite and observation tiles. Time range selector fetches the correct frame sequence per layer.</div>
-  </div>
-  <div class="feat">
-    <div class="feat-k">Auth & billing</div>
-    <div class="feat-v">Supabase auth (Google OAuth + email). Stripe subscription plans with credit-based export usage metering.</div>
-  </div>
-  <div class="feat">
-    <div class="feat-k">Broadcast mode</div>
-    <div class="feat-v">Virtual camera output compatible with OBS and vMix. Automated city slide templates with live data updates.</div>
-  </div>
-</div>
-
-<div class="img-grid" style="margin-top:16px">
-  <figure class="img-box">
-    <img src="data/lp5.webp" alt="Export panel with format, resolution and fps controls" loading="lazy">
-    <figcaption>Export panel — format crop area, resolution selector, frame rate, output queue</figcaption>
-  </figure>
-  <figure class="img-box">
-    <img src="data/lp6.webp" alt="Auth and subscription plan selection screen" loading="lazy">
-    <figcaption>Subscription and auth — Supabase for accounts, Stripe for plan management and export credits</figcaption>
-  </figure>
-</div>
-
-<div class="rule"></div>
-
-<!-- SECTION 05: STACK -->
+<!-- STACK -->
 <div class="sh"><span class="sh-no">05</span><span class="sh-title">Stack</span></div>
 <p class="body-text">No framework, vanilla JS modules with a hand-rolled project state store. Frontend deployed to AWS CloudFront. All persistence through Supabase (auth + project saves). Stripe handles subscriptions and metered export credits.</p>
 <div class="stack-row">
