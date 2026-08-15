@@ -399,7 +399,7 @@ var CATEGORIES = [
     id: 'remote-sensing', title: 'Remote Sensing', sub: 'SAR · Satellite imagery · Deep learning',
     items: [
       { n:'05', slug:'valencia-sar', title:'A flood map is a threshold, not a fact', desc:'Sentinel-1 SAR over Valencia. Same scenes, 21 to 70 km² depending on four choices.', img:'work/valencia-sar/data/card.jpg', facts:[['Estimate','40 km²'],['Range','21-70']] },
-      { n:'06', slug:'land-cover', title:'The same model scores 98.5% and 70.8%', desc:'U-Net on Sentinel-2. Random split looks solved; geographic hold-out says otherwise.', img:'work/land-cover/data/seg_pred.png', facts:[['Held-out','70.8%'],['IoU','0.531']] }
+      { n:'06', slug:'land-cover', title:'Land cover segmentation from Sentinel-2 imagery', desc:'U-Net on Sentinel-2. Random split looks solved; geographic hold-out says otherwise.', img:'work/land-cover/data/seg_pred.png', facts:[['Held-out','70.8%'],['IoU','0.531']] }
     ]
   },
   {
@@ -407,7 +407,7 @@ var CATEGORIES = [
     items: [
       { n:'01', slug:'amsterdam-accessibility', title:'How far Amsterdam actually reaches on foot', desc:'Walking network analysis. 1 in 4 nearby pairs needs more than 2x straight-line distance.', img:'work/amsterdam-accessibility/data/isochrone-preview.png', facts:[['Detour','1.41x'],['Over 2x','24.1%']] },
       { n:'02', slug:'spatial-api', title:'What a spatial index is actually worth', desc:'Measured: 16x faster at 250 m, 1.9x at 2 km, nothing for two of three endpoints.', img:'work/spatial-api/data/index-benchmark.png', facts:[['250 m','16.3x'],['Index','592 kB']] },
-      { n:'03', slug:'osm-etl', title:'386,094 features, zero repairs', desc:'Full validating ETL over OpenStreetMap Amsterdam. Zero invalid geometries.', img:'work/osm-etl/data/layers.png', facts:[['Features','386 k'],['Repairs','0']] }
+      { n:'03', slug:'osm-etl', title:'OpenStreetMap ETL and validation pipeline', desc:'Full validating ETL over OpenStreetMap Amsterdam. Zero invalid geometries.', img:'work/osm-etl/data/layers.png', facts:[['Features','386 k'],['Repairs','0']] }
     ]
   },
   {
