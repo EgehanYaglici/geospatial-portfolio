@@ -1,0 +1,9 @@
+dataset,input_features,output_features,invalid_geometry,repaired,duplicates,crs,size_mb
+boundary,1,1,0,0,0,EPSG:28992,0.17
+buildings,197578,197578,0,0,0,EPSG:28992,149.3
+parks,268,268,0,0,0,EPSG:28992,0.38
+pois,7583,7583,0,0,0,EPSG:28992,0.88
+roads_drive,29835,29835,0,0,0,EPSG:28992,8.29
+roads_walk,143034,143034,0,0,0,EPSG:28992,34.78
+transit,1641,1641,0,0,0,EPSG:28992,0.28
+water,6154,6154,0,0,0,EPSG:28992,5.54

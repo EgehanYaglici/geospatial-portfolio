@@ -1,0 +1,10 @@
+dataset,format,size_mb,write_time_s,read_time_s
+pois,GeoJSON,2.105,0.103,0.089
+pois,GeoPackage,1.203,0.085,0.029
+pois,GeoParquet,0.235,2.221,3.531
+parks,GeoJSON,0.702,0.037,0.019
+parks,GeoPackage,0.371,0.017,0.005
+parks,GeoParquet,0.219,0.006,0.004
+transit,GeoJSON,0.475,0.021,0.021
+transit,GeoPackage,0.355,0.023,0.01
+transit,GeoParquet,0.059,0.005,0.004

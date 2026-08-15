@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Territoire de Mitwaba | Egehan Yaglici</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3987e5; --orange: #d95926; }
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+.hero-row {
+  display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 28px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.case-id { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); margin-bottom: 12px; }
+.desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 10px; }
+.desc-sm { font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 18px; }
+.tags .t { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px; }
+
+.hero-img { border: 1px solid var(--rule-strong); overflow: hidden; }
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.rule { height: 1px; background: var(--rule); margin-block: 32px; }
+.sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; margin-top: 32px; }
+.sh-no { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); min-width: 22px; }
+.sh-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+
+.body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
+.body-text + .body-text { margin-top: 10px; }
+
+.fig-row { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
+.fig-cell { border: 1px solid var(--rule-strong); padding: 14px 16px; }
+.fig-cell .fk { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.fig-cell .fv { font-size: 1.45rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.fig-cell .fu { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+
+.pipeline { display: flex; flex-direction: column; gap: 0; margin-top: 16px; max-width: 68ch; }
+.pip-step { display: flex; gap: 14px; padding: 10px 0; border-top: 1px solid var(--rule); align-items: flex-start; }
+.pip-n { font-family: var(--mono); font-size: 10px; color: var(--accent); min-width: 28px; padding-top: 1px; }
+.pip-body { flex: 1; }
+.pip-title { font-size: 12px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+.pip-desc { font-size: 11.5px; color: var(--ink-3); line-height: 1.5; }
+
+.img-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+.img-grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-top: 16px; }
+@media (max-width: 780px) { .img-grid-4 { grid-template-columns: repeat(2,1fr); } }
+@media (max-width: 640px) { .img-grid { grid-template-columns: 1fr; } .img-grid-4 { grid-template-columns: 1fr; } }
+.img-box { border: 1px solid var(--rule-strong); overflow: hidden; }
+.img-box img { width: 100%; height: auto; display: block; }
+.img-box figcaption { font-size: 11px; color: var(--ink-3); padding: 7px 11px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.mn { display: flex; gap: 10px; font-size: 12px; line-height: 1.55; padding: 7px 0; border-top: 1px solid var(--rule); }
+.mn-k { font-family: var(--mono); font-size: 10px; color: var(--ink-3); min-width: 110px; flex-shrink: 0; }
+.mn-v { color: var(--ink-2); }
+
+.collab-note {
+  margin-top: 24px; padding: 12px 16px;
+  border: 1px solid var(--rule-strong);
+  background: var(--surface-1);
+  font-size: 12px; color: var(--ink-3); line-height: 1.6;
+}
+.collab-note b { color: var(--ink-2); }
+</style>
+</head>
+<body>
+<div class="page">
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Territoire de Mitwaba</span>
+    <div class="nav-links">
+      <a href="../../#work">Work</a>
+      <a href="../../#about">About</a>
+    </div>
+  </div>
+</nav>
+
+<div class="hero-row">
+  <div>
+    <div class="case-id">Client Work &middot; Georeferencing & Cartography</div>
+    <h1>Territoire de Mitwaba</h1>
+    <p class="desc">Administrative boundaries of Mitwaba Territory, Haut-Katanga, DR Congo, extracted from a 2016 printed electoral atlas via a 22-step automated Python pipeline and redrawn as a clean vector map on a modern terrain base.</p>
+    <p class="desc-sm">The source was a scanned, bound atlas photographed at an angle. No coordinate metadata. No digital source. The pipeline detects graticule intersections automatically, builds GCPs from printed label values, segments boundary fills by colour, polygonises them, and produces a print-ready A0 output with an uncertainty note.</p>
+    <div class="tags">
+      <span class="t">Python / GDAL</span>
+      <span class="t">QGIS</span>
+      <span class="t">OpenCV</span>
+      <span class="t">Scikit-learn</span>
+      <span class="t">Georeferencing</span>
+      <span class="t">UTM 35S</span>
+      <span class="t">OpenStreetMap</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/map.jpg" alt="Territoire de Mitwaba A0 administrative map">
+    <figcaption>A0 final output, 1 territoire · 3 secteurs/chefferie · 14 groupements · 1:281,000</figcaption>
+  </figure>
+</div>
+
+<div class="rule"></div>
+
+<div class="fig-row">
+  <div class="fig-cell"><div class="fk">Territory area</div><div class="fv">19,842</div><div class="fu">km²</div></div>
+  <div class="fig-cell"><div class="fk">Admin units</div><div class="fv">14</div><div class="fu">groupements</div></div>
+  <div class="fig-cell"><div class="fk">Pipeline steps</div><div class="fv">22</div><div class="fu">Python scripts</div></div>
+</div>
+
+<div class="sh"><span class="sh-no">01</span><span class="sh-title">Source material</span></div>
+<p class="body-text">The only available record of Mitwaba's internal boundaries was the 2016 CENI electoral atlas, a printed book, photographed page by page. The images were tilted, the text at 8pt was too small for reliable OCR, and the coordinate grid labels had to be read manually then matched to automatically detected positions. No digital GIS source existed.</p>
+
+<div class="img-grid" style="margin-top:16px">
+  <figure class="img-box">
+    <img src="data/source_atlas_p2.png" alt="Haut-Katanga province overview, CENI atlas page 15">
+    <figcaption>Atlas p.15, Province du Haut-Katanga overview. Mitwaba territoire top-left.</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/source_atlas.png" alt="2016 CENI electoral atlas, operational deployment pages">
+    <figcaption>Atlas p.12, Révision du fichier électoral 2016-2017, operational deployment maps</figcaption>
+  </figure>
+</div>
+
+<div class="sh"><span class="sh-no">02</span><span class="sh-title">Pipeline</span></div>
+<p class="body-text">22 numbered Python scripts, each with a single responsibility. The pipeline runs end-to-end and is fully reproducible from the raw scans.</p>
+
+<div class="pipeline">
+  <div class="pip-step"><span class="pip-n">01-02</span><div class="pip-body"><div class="pip-title">Frame & graticule detection</div><div class="pip-desc">Detect the neatline frame corners and the printed coordinate grid intersections using edge detection + Hough lines. Rectify each plate so the frame is axis-aligned before any measurement is taken.</div></div></div>
+  <div class="pip-step"><span class="pip-n">03-04</span><div class="pip-body"><div class="pip-title">GCP construction & GeoTIFF write</div><div class="pip-desc">Coordinate label values read manually from margin strips; label positions detected automatically. Each graticule crossing becomes a ground control point. Output: a georeferenced GeoTIFF per plate in UTM Zone 35S.</div></div></div>
+  <div class="pip-step"><span class="pip-n">05</span><div class="pip-body"><div class="pip-title">Overlay verification</div><div class="pip-desc">Warp each georeferenced plate onto an OSM basemap and measure residual offset at road intersections and river confluences as an independent accuracy check.</div></div></div>
+  <div class="pip-step"><span class="pip-n">06-10</span><div class="pip-body"><div class="pip-title">Colour segmentation → polygons</div><div class="pip-desc">Each groupement is printed as a flat colour tint. Mask everything on top (roads, rivers, labels, legend boxes, park hatching). Cluster remaining pixels by colour, classify each cluster as a fill or background, polygonise, then harmonise topology across sector boundaries to remove gaps and overlaps.</div></div></div>
+  <div class="pip-step"><span class="pip-n">11-12</span><div class="pip-body"><div class="pip-title">Context & river check</div><div class="pip-desc">Pull OSM roads, rivers, water bodies, and settlements. Flag boundary segments where the digitised line diverges from the OSM river by more than the expected accuracy (200-800 m at 1:281,000).</div></div></div>
+  <div class="pip-step"><span class="pip-n">13-19</span><div class="pip-body"><div class="pip-title">Map, QGIS project, packaging</div><div class="pip-desc">Generate the A0 map layout, write the QGIS project with styled layers and relative paths, produce shapefiles, write the uncertainty note PDF, build the delivery manifest.</div></div></div>
+  <div class="pip-step"><span class="pip-n">20-22</span><div class="pip-body"><div class="pip-title">QA & independent checks</div><div class="pip-desc">Independent georeferencing check on a different set of tie-points. Cross-sheet topology check across all sector plates. Residual error analysis to assess whether a denser GCP network would improve accuracy.</div></div></div>
+</div>
+
+<div class="sh"><span class="sh-no">03</span><span class="sh-title">Pipeline in progress</span></div>
+<p class="body-text">Each step produces a QA image. These are the Secteur de Balomotwa plate (atlas page 22).</p>
+
+<div class="img-grid-4">
+  <figure class="img-box">
+    <img src="data/qa_frame.jpg" alt="Frame detection, neatline corners detected, red border">
+    <figcaption>Step 01, Neatline frame detected (red border). Green dots: graticule intersections auto-detected for GCP construction.</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/qa_gcp.jpg" alt="GCP construction, red crosses at graticule intersections">
+    <figcaption>Step 03, Ground control points built from coordinate labels. Red crosses placed at each latitude/longitude intersection.</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/qa_labels.jpg" alt="Colour segmentation, each groupement fill isolated and labelled">
+    <figcaption>Step 06-08, Colour segmentation result. Each groupement fill clustered and classified. Area in Mpx labelled per region.</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/qa_overlay.jpg" alt="Delivered boundary overlaid on source atlas, red line">
+    <figcaption>Step 16, Final vector boundary (red) overlaid on the source atlas plate. Visual check of fit before delivery.</figcaption>
+  </figure>
+</div><!-- end img-grid-4 -->
+
+<div class="sh"><span class="sh-no">04</span><span class="sh-title">Output</span></div>
+
+<div style="display:grid; grid-template-columns: 360px 1fr; gap: 12px; margin-top:16px; align-items:start;">
+  <figure class="img-box">
+    <img src="data/map_clean.png" alt="Clean vector map, all groupements">
+    <figcaption>Clean vector, groupements by sector</figcaption>
+  </figure>
+  <figure class="img-box">
+    <img src="data/closeup.png" alt="Closeup, Secteur de Banweshi, southern boundary">
+    <figcaption>Detail, Secteur de Banweshi southern boundary. The Lufira river forms the administrative divide between Banweshi and Balomotwa.</figcaption>
+  </figure>
+</div>
+
+<div class="sh"><span class="sh-no">05</span><span class="sh-title">Deliverables</span></div>
+<div class="mn"><span class="mn-k">Map</span><span class="mn-v">A0 portrait PDF + PNG/JPG at 4966 × 7022 px, print-ready</span></div>
+<div class="mn"><span class="mn-k">Vector data</span><span class="mn-v">GeoPackage, territoire, secteurs/chefferie, groupements + context layers</span></div>
+<div class="mn"><span class="mn-k">Shapefiles</span><span class="mn-v">Separate per layer, with projection file</span></div>
+<div class="mn"><span class="mn-k">Uncertainty note</span><span class="mn-v">PDF identifying flagged segments and accuracy range</span></div>
+<div class="mn"><span class="mn-k">QGIS project</span><span class="mn-v">.qgz with styled layers, relative paths, reproducible from data</span></div>
+<div class="mn"><span class="mn-k">Pipeline source</span><span class="mn-v">22 Python scripts in <code>scripts/</code>, fully reproducible from the raw scans</span></div>
+
+<div style="height:64px"></div>
+</div>
+</body>
+</html>

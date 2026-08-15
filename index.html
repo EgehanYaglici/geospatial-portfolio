@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Egehan Yaglici, Geospatial Engineer</title>
+<meta name="description" content="Seven geospatial engineering case studies: LiDAR classification, SAR flood detection, deep learning on satellite imagery, spatial databases and network analysis.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  background: #121418;
+  color: #edf0f4;
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+a { text-decoration: none; color: inherit; }
+
+.wrap { max-width: 1200px; margin: 0 auto; padding-inline: 36px; }
+@media (max-width: 640px) { .wrap { padding-inline: 20px; } }
+
+/* Nav */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: rgba(18,20,24,0.88);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.nav-i { display: flex; align-items: center; height: 52px; gap: 24px; }
+.nav-brand { font-family: "IBM Plex Mono", monospace; font-size: 12.5px; color: #edf0f4; }
+.nav-sep { margin-left: auto; }
+.nav-links { display: flex; gap: 20px; }
+.nav-links a { font-size: 13px; color: #636870; transition: color .15s; }
+.nav-links a:hover { color: #edf0f4; }
+
+/* Hero */
+.hero { padding-block: 72px 56px; }
+.hero-tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 10.5px; letter-spacing: 0.12em; text-transform: uppercase;
+  color: #636870; margin-bottom: 22px;
+}
+.hero h1 {
+  font-size: clamp(2.2rem, 5.5vw, 4rem);
+  font-weight: 600; letter-spacing: -0.033em; line-height: 1.08;
+  color: #edf0f4; margin-bottom: 6px;
+}
+.hero-role { font-size: clamp(1rem, 1.5vw, 1.12rem); color: #636870; margin-bottom: 18px; }
+.hero-desc {
+  font-size: 14.5px; line-height: 1.7; color: #9ea3ab;
+  max-width: 500px; margin-bottom: 32px;
+}
+.hero-btns { display: flex; gap: 10px; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px;
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px; letter-spacing: 0.04em;
+  border: 1px solid rgba(255,255,255,0.10);
+  color: #9ea3ab; background: rgba(255,255,255,0.03);
+  transition: color .15s, border-color .15s, background .15s;
+}
+.btn:hover { color: #edf0f4; border-color: rgba(255,255,255,0.20); background: rgba(255,255,255,0.06); }
+
+/* Categories - tab bar */
+.cats-wrap {
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  margin-bottom: 0;
+}
+.cats { display: flex; gap: 0; flex-wrap: wrap; margin-bottom: 0; }
+.cat-btn {
+  font-family: "IBM Plex Mono", monospace;
+  padding: 10px 20px 9px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: none;
+  cursor: pointer; transition: color .15s, border-color .15s;
+  position: relative; top: 1px;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 3px;
+  text-align: left;
+}
+.cat-btn:hover .cat-label { color: #c4c8cf; }
+.cat-btn.active .cat-label { color: #edf0f4; }
+.cat-btn.active { border-bottom-color: #3987e5; }
+.cat-label {
+  font-size: 11px; letter-spacing: .05em;
+  color: #636870;
+  display: flex; align-items: center; gap: 7px;
+  transition: color .15s;
+}
+.cat-sub {
+  font-size: 9px; letter-spacing: .04em;
+  color: #3a3e46;
+  transition: color .15s;
+}
+.cat-btn:hover .cat-sub { color: #52565f; }
+.cat-btn.active .cat-sub { color: #4a6fa5; }
+.cat-btn .ct {
+  font-size: 9px; font-weight: 500;
+  color: #3e4249;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  padding: 1px 5px;
+  border-radius: 3px;
+  min-width: 16px; text-align: center;
+  transition: color .15s, background .15s, border-color .15s;
+}
+.cat-btn.active .ct {
+  color: #3987e5;
+  background: rgba(57,135,229,0.12);
+  border-color: rgba(57,135,229,0.25);
+}
+
+/* Panel */
+.panel {
+  display: none;
+  padding: 20px 0;
+  animation: panelIn .18s ease;
+}
+.panel.open { display: block; }
+@keyframes panelIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* Cards grid - 3 columns glass */
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+@media (max-width: 900px) { .cards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 560px) { .cards { grid-template-columns: 1fr; } }
+
+.card {
+  display: flex; flex-direction: column;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: border-color .2s, background .2s, transform .2s;
+}
+.card:hover {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-3px);
+}
+
+.card-img {
+  width: 100%; aspect-ratio: 16/9;
+  background: #0e1014; overflow: hidden; flex: none;
+}
+.card-img img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+  transition: transform .4s ease;
+}
+.card:hover .card-img img { transform: scale(1.04); }
+
+.card-body { padding: 14px 15px 13px; flex: 1; display: flex; flex-direction: column; }
+.card-num {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: #3e4249; margin-bottom: 5px;
+}
+.card-title {
+  font-size: 13.5px; font-weight: 500; color: #edf0f4;
+  line-height: 1.32; margin-bottom: 6px;
+}
+.card-desc {
+  font-size: 11.5px; line-height: 1.55; color: #636870; flex: 1;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.card-facts { display: flex; gap: 12px; margin-top: 8px; }
+.card-fact {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px; color: #3e4249;
+}
+.card-fact b { color: #9ea3ab; font-weight: 500; }
+
+/* Rule */
+.rule { height: 1px; background: rgba(255,255,255,0.06); margin-block: 48px; }
+
+/* About */
+.about {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 44px; align-items: start;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.02);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  padding: 34px 38px;
+}
+@media (max-width: 760px) { .about { grid-template-columns: 1fr; gap: 22px; padding: 24px 20px; } }
+.about h2 { font-size: 1.3rem; font-weight: 600; letter-spacing: -0.02em; color: #edf0f4; margin-bottom: 10px; }
+.about p { font-size: 13.5px; color: #636870; line-height: 1.72; }
+.about p + p { margin-top: 9px; }
+.about-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+.skills { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.sk {
+  border: 1px solid rgba(255,255,255,0.06);
+  background: rgba(255,255,255,0.02);
+  padding: 9px 11px;
+}
+.sk-k { font-family: "IBM Plex Mono", monospace; font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase; color: #3e4249; }
+.sk-v { font-size: 10.5px; color: #636870; margin-top: 4px; line-height: 1.5; }
+
+/* Footer */
+.foot {
+  padding-block: 22px 32px;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-brand { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: #3e4249; }
+.foot-links { display: flex; gap: 18px; }
+.foot-links a { font-size: 12px; color: #3e4249; }
+.foot-links a:hover { color: #9ea3ab; }
+
+/* Reports */
+.sec-head { margin-bottom: 18px; }
+.sec-head h2 {
+  font-size: 15px; font-weight: 500; color: #edf0f4; letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+.sec-head p { font-size: 12.5px; line-height: 1.6; color: #636870; max-width: 64ch; }
+.sec-head .more { font-size: 12px; color: #9ea3ab; }
+.sec-head .more:hover { color: #edf0f4; }
+
+.rcards { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+@media (max-width: 980px) { .rcards { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) { .rcards { grid-template-columns: 1fr; } }
+.rcard {
+  display: flex; flex-direction: column;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  overflow: hidden;
+  transition: border-color .2s, background .2s, transform .2s;
+}
+.rcard:hover {
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.06);
+  transform: translateY(-3px);
+}
+.rcard-img {
+  width: 100%; aspect-ratio: 1 / 1.414;
+  background: #0e1014; overflow: hidden; flex: none;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+.rcard-img img {
+  width: 100%; height: 100%; object-fit: cover; object-position: top;
+  display: block; transition: transform .4s ease;
+}
+.rcard:hover .rcard-img img { transform: scale(1.03); }
+.rcard-body { padding: 13px 14px; flex: 1; display: flex; flex-direction: column; }
+.rcard-num {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px; letter-spacing: 0.09em; text-transform: uppercase;
+  color: #3e4249; margin-bottom: 5px;
+}
+.rcard-title {
+  font-size: 13px; font-weight: 500; color: #edf0f4;
+  line-height: 1.32; margin-bottom: 6px; flex: 1;
+}
+.rcard-tools {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 9px; line-height: 1.6; color: #767b84; margin-bottom: 9px;
+}
+.rcard-meta {
+  display: flex; align-items: center; gap: 8px;
+  font-family: "IBM Plex Mono", monospace; font-size: 9px; color: #3e4249;
+  border-top: 1px solid rgba(255,255,255,0.06); padding-top: 8px;
+}
+.rcard-meta .open { margin-left: auto; color: #9ea3ab; }
+.rcard:hover .rcard-meta .open { color: #edf0f4; }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+<nav class="nav">
+  <div class="nav-i">
+    <span class="nav-brand">Egehan Yaglici</span>
+    <div class="nav-sep"></div>
+    <div class="nav-links">
+      <a href="#work">Work</a>
+      <a href="#reports">Reports</a>
+      <a href="#about">About</a>
+      <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
+    </div>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="hero-tag">Geospatial Engineering</div>
+  <h1>Egehan Yaglici</h1>
+  <p class="hero-role">Geospatial Data Engineer</p>
+  <p class="hero-desc">
+    Geospatial engineer. I start with a question, build whatever is needed to answer it properly, and do not stop until the result is something I can actually trust.
+  </p>
+  <div class="hero-btns">
+    <a class="btn" href="#work">Case Studies &darr;</a>
+    <a class="btn" href="#reports">Reports &darr;</a>
+    <a class="btn" href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</section>
+
+<div class="rule"></div>
+
+<section id="work">
+  <div class="cats-wrap"><div class="cats" id="cats"></div></div>
+  <div id="panels"></div>
+</section>
+
+<div class="rule"></div>
+
+<section id="reports">
+  <div class="sec-head">
+    <h2>Work &amp; Project Reports</h2>
+    <p>
+      Four written reports from 2023, produced on the desktop GIS stack rather than in code:
+      ArcGIS Pro, TerraScan, TerraSolid, CloudCompare and PDAL.
+      <a class="more" href="reports/">All reports &rarr;</a>
+    </p>
+  </div>
+  <div class="rcards" id="rcards"></div>
+</section>
+
+<div class="rule"></div>
+
+<section id="about" style="padding-bottom:64px">
+  <div class="about">
+    <div>
+      <h2>About</h2>
+      <p>
+        I am a geospatial data engineer. My work spans airborne LiDAR processing, satellite change detection, road network analysis, transport simulation, and full-stack WebGIS: the kind of work that starts with a raw dataset and ends with something a person without a GIS background can actually use.
+      </p>
+      <p>
+        I build things until they are correct. Not until they look right or pass a test, but until the underlying reasoning holds up, because in spatial work an answer that is almost right is usually wrong in ways that matter. Most of the projects here started as a question I could not answer with someone else's tool. So I built the tool, and then built the analysis on top of it.
+      </p>
+      <p>
+        I also take on consulting work. Recent projects include a browser-based tile generation engine that cut a multi-hour per-site workflow down to under ten minutes, and a broadcast weather graphics platform with real-time radar, satellite layers, and 4K export. The interesting problems are usually the quiet ones: everything appears to be working and the results are subtly wrong for a reason nobody documented.
+      </p>
+      <div class="about-btns">
+        <a class="btn" href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
+        <a class="btn" href="mailto:egehanyaglici007@gmail.com">Email</a>
+      </div>
+    </div>
+    <div class="skills">
+      <div class="sk"><div class="sk-k">Point cloud</div><div class="sk-v">laspy, COPC/LAZ, SMRF, DTM/DSM</div></div>
+      <div class="sk"><div class="sk-k">Earth observation</div><div class="sk-v">Sentinel-1/2, STAC, COG</div></div>
+      <div class="sk"><div class="sk-k">Machine learning</div><div class="sk-v">PyTorch, U-Net, geo cross-val</div></div>
+      <div class="sk"><div class="sk-k">Spatial DB</div><div class="sk-v">PostGIS, GIST, query planning</div></div>
+      <div class="sk"><div class="sk-k">Raster</div><div class="sk-v">Rasterio, zonal stats, terrain</div></div>
+      <div class="sk"><div class="sk-k">Networks</div><div class="sk-v">OSMnx, NetworkX, GeoParquet</div></div>
+      <div class="sk"><div class="sk-k">Web GIS</div><div class="sk-v">React, MapLibre GL, FastAPI, MVT</div></div>
+      <div class="sk"><div class="sk-k">Transport</div><div class="sk-v">SUMO, INFORMO, scenario analysis</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-brand">Egehan Yaglici</span>
+  <div class="foot-links">
+    <a href="#work">Work</a>
+    <a href="#about">About</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</footer>
+
+</div>
+
+<script>
+var CATEGORIES = [
+  {
+    id: 'lidar-3d', title: 'LiDAR & 3D', sub: 'Point cloud · Elevation · Classification',
+    items: [
+      { n:'07', slug:'lidar-toledo', title:'Classifying 13.7 M points with the answers taken away', desc:'Airborne LiDAR over Toledo. Labels stripped, reclassified from geometry alone.', img:'work/lidar-toledo/data/card.jpg', facts:[['F1','0.92'],['Points','13.7 M']] },
+      { n:'04', slug:'rotterdam-heights', title:'The terrain model is empty under every building', desc:'55% DTM nodata under roofs. Closing that gap measures 1,740 building heights.', img:'work/rotterdam-heights/data/gap.png', facts:[['Buildings','1,740'],['Tallest','158 m']] }
+    ]
+  },
+  {
+    id: 'remote-sensing', title: 'Remote Sensing', sub: 'SAR · Satellite imagery · Deep learning',
+    items: [
+      { n:'05', slug:'valencia-sar', title:'A flood map is a threshold, not a fact', desc:'Sentinel-1 SAR over Valencia. Same scenes, 21 to 70 km² depending on four choices.', img:'work/valencia-sar/data/card.jpg', facts:[['Estimate','40 km²'],['Range','21-70']] },
+      { n:'06', slug:'land-cover', title:'The same model scores 98.5% and 70.8%', desc:'U-Net on Sentinel-2. Random split looks solved; geographic hold-out says otherwise.', img:'work/land-cover/data/seg_pred.png', facts:[['Held-out','70.8%'],['IoU','0.531']] }
+    ]
+  },
+  {
+    id: 'spatial-data', title: 'Spatial Data', sub: 'PostGIS · ETL · Network analysis',
+    items: [
+      { n:'01', slug:'amsterdam-accessibility', title:'How far Amsterdam actually reaches on foot', desc:'Walking network analysis. 1 in 4 nearby pairs needs more than 2x straight-line distance.', img:'work/amsterdam-accessibility/data/isochrone-preview.png', facts:[['Detour','1.41x'],['Over 2x','24.1%']] },
+      { n:'02', slug:'spatial-api', title:'What a spatial index is actually worth', desc:'Measured: 16x faster at 250 m, 1.9x at 2 km, nothing for two of three endpoints.', img:'work/spatial-api/data/index-benchmark.png', facts:[['250 m','16.3x'],['Index','592 kB']] },
+      { n:'03', slug:'osm-etl', title:'386,094 features, zero repairs', desc:'Full validating ETL over OpenStreetMap Amsterdam. Zero invalid geometries.', img:'work/osm-etl/data/layers.png', facts:[['Features','386 k'],['Repairs','0']] }
+    ]
+  },
+  {
+    id: 'web-gis', title: 'Web GIS', sub: 'Demos · Personal projects',
+    items: [
+      { n:'Demo', slug:'traverse', title:'WebGIS Road: Collaborative Road Network Editor', desc:'Concept demo: multi-user road quality tracker and geometry editor. Three fictional field editors share live PostGIS data, claim tasks in one click, and see each other\'s pins update in real time via polling.', img:'work/traverse/img/webgis_issues.png', facts:[['Roads','170k+'],['Tasks','8 demo']], accent:'#3B82F6' },
+      { n:'Demo', slug:'traverse-madrid', title:'Traverse: Madrid Traffic Scenario Lab', desc:'Concept demo: real-time INFORMO traffic data and SUMO microsimulation. Design road closures or speed changes, run a simulation, compare KPIs against the baseline in under two minutes.', img:'work/traverse-madrid/img/map_loaded.png', facts:[['Sensors','4,893'],['Edges','5,942']], accent:'#3B82F6' }
+    ]
+  },
+  {
+    id: 'client-work', title: 'Client Work', sub: 'Cartography · Consulting',
+    items: [
+      { n:'↗', slug:'weather-agency', title:'Weather graphics engine for broadcast and streaming', desc:'Full-stack web GIS platform: real-time radar, satellite and observation layers, keyframe animation timeline, 4K export, OBS/vMix integration.', img:'work/weather-agency/data/app.png', facts:[['Export','4K MP4'],['Layers','40+']] },
+      { n:'↗', slug:'mitwaba', title:'Territoire de Mitwaba, administrative boundary digitisation', desc:'2016 CENI electoral atlas georeferenced onto a modern terrain base. 3 sectors, 14 groupements, 19,842 km² across Haut-Katanga, DR Congo. A0 print-ready output.', img:'work/mitwaba/data/map.jpg', facts:[['Area','19,842 km²'],['Scale','1:281,000']] },
+      { n:'↗', slug:'tile-engine', title:'Tile pipeline consulting, browser georeferencing to Z/X/Y tiles', desc:'Pipeline architecture for a client: homography-based georeferencing, Lanczos3 mipmap anti-aliasing, parallelised tile export, all in the browser, no server required.', img:'work/tile-engine/data/tile_detail_z18.jpg', facts:[['Tiles','4,065'],['Zoom','9-22']] }
+    ]
+  }
+];
+
+function renderCard(w) {
+  var href = w.external ? w.external : 'work/' + w.slug + '/';
+  var target = w.external ? ' target="_blank" rel="noopener"' : '';
+  var numLabel = w.n === '↗' ? '<span style="color:#636870">Client</span>' : w.n === 'Demo' ? '<span style="color:#3B82F6">Demo</span>' : 'Case ' + w.n;
+  var ac = w.accent || '#3987e5';
+  var imgHtml = w.img
+    ? '<img src="' + w.img + '" alt="" loading="lazy">'
+    : '<div style="height:100%;min-height:120px;background:linear-gradient(135deg,#0a0e1a,#0d1630);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px">' +
+        '<div style="display:flex;align-items:center;gap:7px">' +
+          '<div style="width:22px;height:22px;border-radius:6px;background:' + ac + ';display:flex;align-items:center;justify-content:center">' +
+            '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>' +
+          '</div>' +
+          '<span style="font-size:13px;font-weight:600;color:#F1F5F9;letter-spacing:-.015em">Traverse</span>' +
+        '</div>' +
+        '<div style="display:flex;gap:5px">' +
+          '<span style="padding:2px 7px;border-radius:999px;background:rgba(16,185,129.15);border:1px solid rgba(16,185,129.3);font-size:9.5px;color:#34D399;font-weight:600">Done</span>' +
+          '<span style="padding:2px 7px;border-radius:999px;background:rgba(59,130,246.15);border:1px solid rgba(59,130,246.3);font-size:9.5px;color:#60A5FA;font-weight:600">In Progress</span>' +
+        '</div>' +
+        '<div style="font-family:monospace;font-size:9px;color:#334155;letter-spacing:.04em">PostGIS · MVT · Task workflow</div>' +
+      '</div>';
+  return '<a class="card" href="' + href + '"' + target + '>' +
+    '<div class="card-img">' + imgHtml + '</div>' +
+    '<div class="card-body">' +
+      '<div class="card-num">' + numLabel + '</div>' +
+      '<div class="card-title">' + w.title + '</div>' +
+      '<div class="card-desc">' + w.desc + '</div>' +
+      '<div class="card-facts">' + w.facts.map(function(f) {
+        return '<span class="card-fact">' + f[0] + ' <b>' + f[1] + '</b></span>';
+      }).join('') + '</div>' +
+    '</div></a>';
+}
+
+function render() {
+  var catsHtml = '';
+  var panelsHtml = '';
+  CATEGORIES.forEach(function(cat, i) {
+    catsHtml += '<button class="cat-btn' + (i===0?' active':'') + '" data-cat="' + cat.id + '">' +
+      '<span class="cat-label">' + cat.title + '<span class="ct">' + cat.items.length + '</span></span>' +
+      (cat.sub ? '<span class="cat-sub">' + cat.sub + '</span>' : '') +
+      '</button>';
+    panelsHtml += '<div class="panel' + (i===0?' open':'') + '" data-panel="' + cat.id + '">' +
+      '<div class="cards">' + cat.items.map(renderCard).join('') + '</div></div>';
+  });
+  document.getElementById('cats').innerHTML = catsHtml;
+  document.getElementById('panels').innerHTML = panelsHtml;
+
+  document.querySelectorAll('.cat-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      var id = btn.dataset.cat;
+      document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+      btn.classList.add('active');
+      document.querySelectorAll('.panel').forEach(function(p){
+        p.classList.toggle('open', p.dataset.panel === id);
+      });
+    });
+  });
+}
+render();
+
+var REPORTS = [
+  { n:'01 / 04', file:'reports/r01-lidar-surface-modelling.pdf',   cover:'reports/covers/r01-lidar-surface-modelling.jpg',
+    title:'LiDAR Surface Modelling &amp; Building Identification', tools:'CloudCompare \u00b7 QGIS \u00b7 Raster analysis', pages:8,  mb:'5.0' },
+  { n:'02 / 04', file:'reports/r02-point-cloud-classification.pdf', cover:'reports/covers/r02-point-cloud-classification.jpg',
+    title:'LiDAR Point Cloud Processing &amp; Object Classification', tools:'Python \u00b7 PDAL \u00b7 SMRF \u00b7 CloudCompare', pages:9,  mb:'7.4' },
+  { n:'03 / 04', file:'reports/r03-3d-city-modelling.pdf',         cover:'reports/covers/r03-3d-city-modelling.jpg',
+    title:'Integrated 3D City Modelling from LiDAR &amp; Building Footprints', tools:'ArcGIS Pro \u00b7 TerraScan \u00b7 TerraSolid', pages:13, mb:'2.3' },
+  { n:'04 / 04', file:'reports/r04-parcel-locker-suitability.pdf', cover:'reports/covers/r04-parcel-locker-suitability.jpg',
+    title:'Parcel Locker Site Suitability Analysis', tools:'ArcGIS Pro \u00b7 ModelBuilder \u00b7 AHP \u00b7 Network analysis', pages:18, mb:'3.3' }
+];
+
+document.getElementById('rcards').innerHTML = REPORTS.map(function (r) {
+  return '<a class="rcard" href="' + r.file + '" target="_blank" rel="noopener">' +
+    '<div class="rcard-img"><img src="' + r.cover + '" alt="Cover of report ' + r.n + ', ' +
+      r.title.replace(/&amp;/g, 'and') + '" loading="lazy"></div>' +
+    '<div class="rcard-body">' +
+      '<div class="rcard-num">Report ' + r.n + '</div>' +
+      '<div class="rcard-title">' + r.title + '</div>' +
+      '<div class="rcard-tools">' + r.tools + '</div>' +
+      '<div class="rcard-meta"><span>PDF \u00b7 ' + r.pages + ' pp \u00b7 ' + r.mb + ' MB</span>' +
+        '<span class="open">Open &rarr;</span></div>' +
+    '</div></a>';
+}).join('');
+</script>
+</body>
+</html>

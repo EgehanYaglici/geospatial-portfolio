@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LiDAR Point Cloud Classification | Egehan Yaglici</title>
+<meta name="description" content="13.7 million airborne LiDAR returns over Toledo, Ohio. Provider labels sealed before processing, then used only to score the result.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root {
+  --accent: #3987e5;
+  --accent-dim: rgba(57,135,229,0.15);
+  --orange: #d95926;
+  --green: #199e70;
+}
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 320px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.65rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 10px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 20px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Viewer */
+.viewer-box {
+  position: relative; background: #0c0d11;
+  border: 1px solid var(--rule-strong); aspect-ratio: 4/3; overflow: hidden;
+}
+.viewer-box canvas { display: block; width: 100%; height: 100%; }
+.v-load {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; color: var(--ink-4);
+}
+.v-legend { position: absolute; left: 12px; bottom: 12px; display: grid; gap: 3px; }
+.v-legend .li { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--ink-2); }
+.v-legend .sw { width: 8px; height: 8px; border-radius: 1px; flex: none; }
+.v-hint {
+  position: absolute; right: 12px; bottom: 12px;
+  font-family: var(--mono); font-size: 9px; color: var(--ink-4); text-align: right; line-height: 1.8;
+}
+
+/* Stage buttons */
+.stages {
+  display: flex; gap: 0; margin-top: 16px;
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.stg-btn {
+  flex: 1; padding: 10px 8px; text-align: center;
+  font-family: var(--mono); font-size: 10px; letter-spacing: .03em;
+  color: var(--ink-3); cursor: pointer;
+  border-right: 1px solid var(--rule-strong);
+  background: transparent; position: relative;
+  transition: color .2s, background .2s;
+}
+.stg-btn:last-child { border-right: none; }
+.stg-btn:hover { color: var(--ink); background: var(--surface-1); }
+.stg-btn.active { color: #fff; background: var(--accent-dim); }
+.stg-btn .bar {
+  position: absolute; bottom: 0; left: 0; height: 2px;
+  background: var(--accent); width: 0;
+}
+.stg-btn.active .bar { width: 100%; transition: width 4s linear; }
+
+/* Section divider */
+.divider { height: 1px; background: var(--rule); margin-block: 36px; }
+
+/* Figures row */
+.fig-row {
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(3, 1fr); } }
+.fig-cell {
+  padding: 16px 14px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Gallery - equal size images */
+.gallery {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+}
+@media (max-width: 640px) { .gallery { grid-template-columns: 1fr; } }
+.gallery figure img {
+  width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block;
+  border: 1px solid var(--rule-strong);
+}
+.gallery figcaption {
+  font-size: 11.5px; color: var(--ink-3); margin-top: 7px; line-height: 1.45;
+}
+.gallery .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Notes with colored keys */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+
+/* Two col notes */
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Section header */
+.sh {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+}
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 07</span>
+    <div class="nav-links"><a href="#results">Results</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left info + right viewer -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 07 &middot; Point Cloud</div>
+    <h1>LiDAR Classification</h1>
+    <p class="desc">An airborne LiDAR survey produces millions of 3D points, but without labels telling you what each point hit. This study takes <b style="color:var(--ink)">13.7 M raw returns</b> over Toledo, Ohio and classifies them into ground, buildings and vegetation <b style="color:var(--ink)">using only their geometry</b>. The provider's own labels were sealed before processing and opened only at the end to score the result.</p>
+    <p class="desc" style="margin-top:8px;font-size:12px;color:var(--ink-3)">The 3D viewer on the right cycles through each pipeline stage: raw elevation colours, noise removal, ground separation, and the final classified result. <b style="color:var(--accent)">Building F1: 0.92</b>.</p>
+    <div class="tags">
+      <span class="t">laspy</span><span class="t">SciPy</span><span class="t">SMRF</span><span class="t">Three.js</span><span class="t">NOAA</span>
+    </div>
+  </div>
+  <div>
+    <div class="viewer-box" id="viewer">
+      <div class="v-load" id="v-load">Loading 300k points...</div>
+      <div class="v-legend" id="v-legend"></div>
+      <div class="v-hint">drag to rotate<br>scroll to zoom</div>
+    </div>
+    <div class="stages" id="stages">
+      <button class="stg-btn active" data-st="0">Raw<div class="bar"></div></button>
+      <button class="stg-btn" data-st="1">Noise<div class="bar"></div></button>
+      <button class="stg-btn" data-st="2">Ground<div class="bar"></div></button>
+      <button class="stg-btn" data-st="3">Final<div class="bar"></div></button>
+    </div>
+  </div>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num">13.7<span class="u">M</span></div><div class="fig-label">Returns</div></div>
+  <div class="fig-cell"><div class="fig-num">91<span class="u">/m&sup2;</span></div><div class="fig-label">Density</div></div>
+  <div class="fig-cell"><div class="fig-num">0.92</div><div class="fig-label">Building F1</div></div>
+  <div class="fig-cell"><div class="fig-num">0.97</div><div class="fig-label">Ground F1</div></div>
+  <div class="fig-cell"><div class="fig-num">0.014<span class="u">%</span></div><div class="fig-label">Noise</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- RESULTS -->
+<section id="results">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">Accuracy</span></div>
+  <div class="two" style="gap:24px">
+    <div>
+      <div class="chart">
+        <div class="chart-head"><span class="chart-title">Per-class F1</span></div>
+        <div class="bars" id="acc-bars" style="--barlabel:130px"></div>
+      </div>
+    </div>
+    <div>
+      <div class="tbl-wrap">
+        <table class="data">
+          <thead><tr><th>Class</th><th>Precision</th><th>Recall</th><th>F1</th></tr></thead>
+          <tbody id="tv-acc-body"></tbody>
+        </table>
+      </div>
+      <p style="font-size:12.5px;color:var(--ink-3);margin-top:12px">NOAA left 50.5% unclassified. This pipeline labels them ground.</p>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- GALLERY -->
+<section>
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Visual results</span></div>
+  <div class="gallery">
+    <figure>
+      <img src="data/classification-result.jpg" alt="Final classified point cloud" loading="lazy">
+      <figcaption><span class="fno">Fig 1</span>Final classification. Ground 71.5%, high veg 10.7%, building 7.0%.</figcaption>
+    </figure>
+    <figure>
+      <img src="data/disagreement-map.jpg" alt="Disagreement map" loading="lazy">
+      <figcaption><span class="fno">Fig 2</span>Disagreement on flat roofs and paved surfaces.</figcaption>
+    </figure>
+    <figure>
+      <img src="data/reference-vs-ours.jpg" alt="Reference vs this pipeline" loading="lazy">
+      <figcaption><span class="fno">Fig 3</span>Reference (left) vs this pipeline (right).</figcaption>
+    </figure>
+    <figure>
+      <img src="data/dtm-dsm-ndsm.jpg" alt="DTM, DSM and nDSM" loading="lazy">
+      <figcaption><span class="fno">Fig 4</span>Derived terrain: DTM, DSM, nDSM at 0.5 m.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PIPELINE with visuals -->
+<section>
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Pipeline</span></div>
+
+  <div class="method-notes">
+    <div class="mn"><div class="mn-k">1. Noise</div><div class="mn-v">Mean distance to 12 nearest neighbours, &gt; mean + 3.5&sigma; flagged. <b>1,980 points</b> at 0.535 m cut.</div></div>
+  </div>
+  <figure style="margin-top:12px;max-width:680px">
+    <img src="data/noise-spatial.jpg" alt="Spatial distribution of noise points" style="width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--rule-strong);display:block">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:6px"><span class="fno" style="color:var(--accent)">Fig 5</span>Noise points in red. Isolated returns far from any surface.</figcaption>
+  </figure>
+
+  <div class="method-notes" style="margin-top:24px">
+    <div class="mn"><div class="mn-k">2. Ground</div><div class="mn-v">Progressive morphological opening (SMRF) on SciPy. <b>9.68 M ground points</b> returned.</div></div>
+  </div>
+  <div class="gallery" style="margin-top:12px">
+    <figure>
+      <img src="data/ground-separation.jpg" alt="Ground separation result" loading="lazy">
+      <figcaption><span class="fno">Fig 6</span>Ground (brown) vs non-ground (green/orange).</figcaption>
+    </figure>
+    <figure>
+      <img src="data/profile-ground-separation.png" alt="Cross section profile showing ground separation" loading="lazy">
+      <figcaption><span class="fno">Fig 7</span>Profile cross-section: SMRF ground surface vs all returns.</figcaption>
+    </figure>
+  </div>
+
+  <div class="method-notes" style="margin-top:24px">
+    <div class="mn"><div class="mn-k">3. HAG</div><div class="mn-v">Z replaced by height over interpolated terrain. Elevation &rarr; 0-39 m object height.</div></div>
+  </div>
+  <figure style="margin-top:12px;max-width:680px">
+    <img src="data/height-normalization.png" alt="Height normalization: elevation to HAG" style="width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--rule-strong);display:block">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:6px"><span class="fno" style="color:var(--accent)">Fig 8</span>Before (absolute elevation) vs after (height above ground).</figcaption>
+  </figure>
+
+  <div class="method-notes" style="margin-top:24px">
+    <div class="mn"><div class="mn-k">4. Objects</div><div class="mn-v">Vegetation by height. Buildings: OSM footprint + <b>per-footprint local ground min</b> &rarr; 0.99 precision.</div></div>
+  </div>
+
+  <figure style="margin-top:16px;max-width:680px">
+    <img src="data/dtm-dsm-ndsm.jpg" alt="DTM, DSM and nDSM side by side" style="width:100%;aspect-ratio:16/9;object-fit:cover;border:1px solid var(--rule-strong);display:block">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:6px"><span class="fno" style="color:var(--accent)">Fig 9</span>Derived terrain products at 0.5 m: DTM (bare earth), DSM (all surfaces), nDSM (object heights).</figcaption>
+  </figure>
+</section>
+
+<div class="divider"></div>
+
+<!-- DECISIONS & LIMITS -->
+<section>
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Protocol</div><div class="mn-v"><b>Blind first, score last.</b> No parameter chosen by watching accuracy.</div></div>
+      <div class="mn"><div class="mn-k">Buildings</div><div class="mn-v"><b>Per-footprint local ground min.</b> Global threshold fails where SMRF mislabels a roof.</div></div>
+      <div class="mn"><div class="mn-k">Reporting</div><div class="mn-v"><b>Both ground scores published.</b> 0.94 on classified points, 0.29 on all 13.7 M.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Flat roofs</div><div class="mn-v">SMRF over-classifies in flat terrain. Roofs outside OSM footprints stay ground.</div></div>
+      <div class="mn"><div class="mn-k">Reference</div><div class="mn-v">Target is another automated product, not surveyed truth. 50% unlabelled.</div></div>
+      <div class="mn"><div class="mn-k">Scope</div><div class="mn-v">One 0.15 km&sup2; flat midwestern tile. No hills, forest, or low density tested.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 07 / LiDAR Point Cloud Classification</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="../../assets/js/viz.js"></script>
+<script>
+var F = Viz.fmt, E = Viz.esc;
+var ACC = [
+  {n:'Ground',            p:0.9429, r:0.9901, f1:0.9659},
+  {n:'Building',          p:0.9873, r:0.8603, f1:0.9194},
+  {n:'High vegetation',   p:0.9378, r:0.7036, f1:0.8040},
+  {n:'Medium vegetation', p:0.3717, r:0.4475, f1:0.4061},
+  {n:'Low vegetation',    p:0.0029, r:0.0116, f1:0.0046}
+];
+document.getElementById('acc-bars').innerHTML = ACC.map(function(d) {
+  return '<div class="bar-row"><span class="bar-lab">' + E(d.n) + '</span>' +
+    '<div class="bar-track"><div class="bar-fill" data-w="' + Math.max(d.f1*100,0.6) + '%"' +
+    ' data-tip-title="' + E(d.n) + '" data-tip-rows=\'' +
+    JSON.stringify([{k:'Precision',v:F(d.p,3)},{k:'Recall',v:F(d.r,3)},{k:'F1',v:F(d.f1,3)}]) +
+    '\'></div></div><span class="bar-val">' + F(d.f1,2) + '</span></div>';
+}).join('');
+document.getElementById('tv-acc-body').innerHTML = ACC.map(function(d) {
+  return '<tr><td>' + E(d.n) + '</td><td class="num">' + F(d.p,4) + '</td><td class="num">' +
+    F(d.r,4) + '</td><td class="num">' + F(d.f1,4) + '</td></tr>';
+}).join('');
+Viz.init(document);
+</script>
+
+<script type="importmap">
+{ "imports": { "three": "../../assets/vendor/three.module.js",
+               "three/addons/controls/OrbitControls.js": "../../assets/vendor/OrbitControls.js" } }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const CLS = {
+  2:{n:'Ground',c:0x8a6a3a}, 3:{n:'Low veg',c:0x146b45},
+  4:{n:'Med veg',c:0x2fa76b}, 5:{n:'High veg',c:0x8ae0ae},
+  6:{n:'Building',c:0xd95926}, 7:{n:'Noise',c:0xe66767},
+  1:{n:'Unclassified',c:0x5a6068}
+};
+const LEGEND = {0:[], 1:[7,1], 2:[2,1], 3:[6,5,4,3,2]};
+
+const host = document.getElementById('viewer');
+const loadEl = document.getElementById('v-load');
+const legendEl = document.getElementById('v-legend');
+const btns = document.querySelectorAll('.stg-btn');
+let stage = 0, colorAttr = null, data = null, autoTimer = null;
+const AUTO_MS = 4000;
+
+function drawLegend() {
+  if (stage===0) { legendEl.innerHTML='<span class="li" style="color:var(--ink-3)">Elevation</span>'; return; }
+  legendEl.innerHTML = (LEGEND[stage]||[]).map(k => {
+    const e=CLS[k];
+    return `<span class="li"><span class="sw" style="background:#${e.c.toString(16).padStart(6,'0')}"></span>${e.n}</span>`;
+  }).join('');
+}
+function setStage(s) {
+  stage = s;
+  btns.forEach(b => {
+    const on = +b.dataset.st === s;
+    b.classList.toggle('active', on);
+    const bar = b.querySelector('.bar');
+    bar.style.transition = 'none'; bar.style.width = '0';
+    if (on) { void bar.offsetWidth; bar.style.transition = `width ${AUTO_MS}ms linear`; bar.style.width = '100%'; }
+  });
+  applyStage();
+}
+function applyStage() {
+  if (!data) return;
+  const {n,znorm,s1,s2,s3} = data, col = colorAttr.array, c = new THREE.Color();
+  for (let i=0;i<n;i++) {
+    if (stage===0) { const t=znorm[i]; c.setHSL(0.6-0.45*t,0.55,0.28+0.42*t); }
+    else { const v=stage===1?s1[i]:stage===2?s2[i]:s3[i]; c.setHex((CLS[v]||CLS[1]).c); }
+    col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b;
+  }
+  colorAttr.needsUpdate=true; drawLegend();
+}
+function startAuto() { stopAuto(); autoTimer=setInterval(()=>setStage((stage+1)%4), AUTO_MS); }
+function stopAuto() { if(autoTimer){clearInterval(autoTimer);autoTimer=null;} }
+
+btns.forEach(b => b.addEventListener('click', () => { stopAuto(); setStage(+b.dataset.st); startAuto(); }));
+
+(async () => {
+  let buf;
+  try { const r=await fetch('data/hero_pointcloud.bin'); if(!r.ok) throw 0; buf=await r.arrayBuffer(); }
+  catch(e) { loadEl.textContent='Point cloud not available'; return; }
+
+  const n=new DataView(buf).getUint32(0,true); let off=4;
+  const pos=new Float32Array(buf,off,n*3); off+=n*12;
+  const znorm=new Float32Array(buf,off,n); off+=n*4;
+  const s1=new Uint8Array(buf,off,n); off+=n;
+  const s2=new Uint8Array(buf,off,n); off+=n;
+  const s3=new Uint8Array(buf,off,n);
+  data={n,znorm,s1,s2,s3};
+
+  const scene=new THREE.Scene();
+  scene.background=new THREE.Color(0x0c0d11);
+  scene.fog=new THREE.Fog(0x0c0d11,400,950);
+  const cam=new THREE.PerspectiveCamera(46,host.clientWidth/host.clientHeight,0.5,4000);
+  cam.position.set(205,138,205);
+  const rend=new THREE.WebGLRenderer({antialias:true,powerPreference:'high-performance'});
+  rend.setPixelRatio(Math.min(devicePixelRatio,2));
+  rend.setSize(host.clientWidth,host.clientHeight);
+  host.appendChild(rend.domElement);
+
+  const geom=new THREE.BufferGeometry();
+  geom.setAttribute('position',new THREE.BufferAttribute(pos,3));
+  colorAttr=new THREE.BufferAttribute(new Float32Array(n*3),3);
+  geom.setAttribute('color',colorAttr);
+  scene.add(new THREE.Points(geom,new THREE.PointsMaterial({size:1.05,vertexColors:true,sizeAttenuation:true,transparent:true,opacity:0.92})));
+
+  const ctrl=new OrbitControls(cam,rend.domElement);
+  ctrl.target.set(0,-4,0); ctrl.enableDamping=true; ctrl.dampingFactor=0.07;
+  ctrl.minDistance=60; ctrl.maxDistance=900; ctrl.maxPolarAngle=Math.PI*0.495;
+  ctrl.autoRotate=true; ctrl.autoRotateSpeed=0.3;
+  ctrl.addEventListener('start',()=>{ctrl.autoRotate=false;});
+
+  applyStage(); loadEl.style.display='none';
+  addEventListener('resize',()=>{cam.aspect=host.clientWidth/host.clientHeight;cam.updateProjectionMatrix();rend.setSize(host.clientWidth,host.clientHeight);});
+  (function loop(){requestAnimationFrame(loop);ctrl.update();rend.render(scene,cam);})();
+  startAuto();
+})();
+</script>
+</body>
+</html>

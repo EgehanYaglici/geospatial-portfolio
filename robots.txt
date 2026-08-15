@@ -1,0 +1,3 @@
+# This portfolio is shared by direct link only. It is not meant to be indexed.
+User-agent: *
+Disallow: /

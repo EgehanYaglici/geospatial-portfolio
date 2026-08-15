@@ -1,0 +1,26 @@
+metric,value
+n_points,13694252
+ground_precision,0.2911
+ground_recall,0.9901
+ground_f1,0.4499
+ground_iou,0.2903
+overall_agreement,0.4913
+tp,2849244
+fp,6938218
+fn,28601
+tn,3878189
+Ground_precision,0.9429
+Ground_recall,0.9901
+Ground_f1,0.9659
+Low Vegetation_precision,0.0029
+Low Vegetation_recall,0.0116
+Low Vegetation_f1,0.0046
+Medium Vegetation_precision,0.3717
+Medium Vegetation_recall,0.4475
+Medium Vegetation_f1,0.4061
+High Vegetation_precision,0.9378
+High Vegetation_recall,0.7036
+High Vegetation_f1,0.8040
+Building_precision,0.9873
+Building_recall,0.8603
+Building_f1,0.9194

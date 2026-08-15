@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SAR Flood Mapping, Valencia 2024 | Egehan Yaglici</title>
+<meta name="description" content="Sentinel-1 change detection over the Valencia DANA flood. The answer moves between 21 and 70 square kilometres depending on choices that are usually left unstated.">
+<meta property="og:title" content="What a SAR flood map actually depends on">
+<meta property="og:description" content="Same scene pair, four defensible thresholds, areas from 21 to 70 km2. Matching the relative orbit cuts the change distribution spread from 5.65 to 3.27 dB.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+<style>
+:root { --accent: #3987e5; --accent-dim: rgba(57,135,229,0.15); --orange: #d95926; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px;
+}
+.hero-left .desc-sm {
+  font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Hero image */
+.hero-img {
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+.hero-img .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Figures */
+.divider { height: 1px; background: var(--rule); margin-block: 32px; }
+.fig-row {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(2, 1fr); } }
+.fig-cell {
+  padding: 16px 12px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-num.highlight { color: var(--orange); }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Map */
+#map { width: 100%; height: 480px; background: var(--surface-2); border: 1px solid var(--rule-strong); }
+@media (max-width: 700px) { #map { height: 340px; } }
+.map-nokey { display: none; padding: 40px; text-align: center; color: var(--ink-3); font-size: 13px; border: 1px solid var(--rule-strong); }
+.map-controls {
+  display: flex; align-items: center; gap: 18px; padding: 12px 0; flex-wrap: wrap;
+  border-bottom: 1px solid var(--rule); margin-bottom: 12px;
+}
+.segs { display: flex; border: 1px solid var(--rule-strong); }
+.segs button {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  padding: 7px 12px; color: var(--ink-3); border-right: 1px solid var(--rule-strong);
+  cursor: pointer; transition: background .15s, color .15s;
+}
+.segs button:last-child { border-right: none; }
+.segs button:hover { color: var(--ink); }
+.segs button[aria-pressed="true"] { color: #fff; background: var(--accent-dim); }
+.readout {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule-strong); border-top: none;
+}
+.readout .r { padding: 12px 14px; border-right: 1px solid var(--rule); }
+.readout .r:last-child { border-right: none; }
+.readout .rv {
+  font-family: var(--mono); font-size: 1.1rem; color: var(--ink);
+  font-variant-numeric: tabular-nums; line-height: 1;
+}
+.readout .rk {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 6px;
+}
+
+/* Notes */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 05</span>
+    <div class="nav-links"><a href="#map-section">Map</a><a href="#method">Method</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left text + right SAR preview -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 05 &middot; SAR / Change Detection</div>
+    <h1>SAR Flood Mapping, Valencia 2024</h1>
+    <p class="desc">When the October 2024 DANA flood hit Valencia, cloud cover blinded every optical satellite. <b style="color:var(--ink)">Sentinel-1 SAR radar sees through cloud</b>. It measures surface roughness by bouncing microwaves off the ground. Water is smooth, so flooded areas scatter the signal away from the sensor and appear dark. This study compares two scenes (before and after the flood) and maps everywhere the backscatter dropped significantly as <b style="color:var(--accent)">probable flood extent</b>.</p>
+    <p class="desc" style="margin-top:10px">The result is not one number, it ranges from <b style="color:var(--orange)">21 to 70 km&sup2;</b> depending on four choices that most papers leave unstated: orbit matching (same viewing angle or not), multilooking (noise smoothing), threshold selection (how much drop counts as "flood"), and minimum patch size (removing isolated pixels). The analysis shows that <b style="color:var(--ink)">the methodology matters more than the data</b>.</p>
+    <div class="tags" style="margin-top:16px">
+      <span class="t">Sentinel-1 RTC</span><span class="t">STAC</span><span class="t">Rasterio</span><span class="t">GeoPandas</span><span class="t">Mapbox GL</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/card.jpg" alt="SAR backscatter change detection over Valencia showing flood extent" loading="eager">
+    <figcaption><span class="fno">Preview</span>Backscatter change surface, dark patches indicate flood-induced signal drop relative to the pre-event scene.</figcaption>
+  </figure>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num highlight">40.0<span class="u">km&sup2;</span></div><div class="fig-label">Best estimate</div></div>
+  <div class="fig-cell"><div class="fig-num">21-70<span class="u">km&sup2;</span></div><div class="fig-label">Defensible range</div></div>
+  <div class="fig-cell"><div class="fig-num">3.27<span class="u">dB</span></div><div class="fig-label">Change spread</div></div>
+  <div class="fig-cell"><div class="fig-num">6.6<span class="u">M</span></div><div class="fig-label">Valid pixels</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- FLOOD EXTENT MAP -->
+<section id="map-section">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">Flood extent explorer</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Toggle between thresholds to see how a single analytical choice shifts the detected flood area by a factor of three. Patches are shaded by size; the Albufera lagoon is permanent water and excluded by the pre-event scene.</p>
+  <div class="map-controls">
+    <span style="font-family:var(--mono);font-size:10px;color:var(--ink-3);letter-spacing:.06em;text-transform:uppercase">Threshold</span>
+    <div class="segs" role="group" aria-label="Threshold">
+      <button data-lvl="inclusive" aria-pressed="true">Median - 2 sigma</button>
+      <button data-lvl="conservative">Median - 3 sigma</button>
+    </div>
+  </div>
+  <div id="map"></div>
+  <div class="map-nokey" id="map-nokey">Interactive map requires Mapbox GL JS. All figures are computed offline.</div>
+  <div class="readout" id="readout"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DATA & METHOD -->
+<section id="method">
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Data &amp; Method</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Log ratio change detection on Sentinel-1 RTC imagery: <code style="font-family:var(--mono);font-size:12px;background:var(--surface-1);padding:2px 5px;border:1px solid var(--rule)">10 * log10(post/pre)</code> per pixel. Same relative orbit (110, descending) eliminates geometric artefacts and reduces the change distribution spread from 5.65 to 3.27 dB compared to the cross-orbit alternative.</p>
+  <figure style="margin-top:14px;margin-bottom:24px">
+    <img src="data/change.png" alt="Backscatter change surface over Valencia showing flood extent in blue" style="width:100%;border:1px solid var(--rule-strong)">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:7px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-right:5px">Fig 1</span>Backscatter change (dB) over the AOI. Blue indicates signal drop consistent with water presence; the Turia floodplain and agricultural areas south of Valencia city show strongest response.</figcaption>
+  </figure>
+  <figure style="margin-top:14px;margin-bottom:24px">
+    <img src="data/sar_histogram.png" alt="Histogram of backscatter change values with threshold markers" style="width:100%;border:1px solid var(--rule-strong)">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:7px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-right:5px">Fig 2</span>Distribution of log-ratio change values. Vertical lines mark the four threshold options. The left tail beyond -5.82 dB (median - 2 sigma) captures the flood signal separated from normal scene variability.</figcaption>
+  </figure>
+  <figure style="margin-top:14px;margin-bottom:24px">
+    <img src="data/sar_analysis.png" alt="SAR analysis summary showing orbit comparison and multilooking effects" style="width:100%;border:1px solid var(--rule-strong)">
+    <figcaption style="font-size:11px;color:var(--ink-3);margin-top:7px"><span style="font-family:var(--mono);font-size:9px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent);margin-right:5px">Fig 3</span>Analysis overview: orbit matching comparison, multilooking effect on spread, and threshold sensitivity. 49-look averaging reduces spread from 4.17 to 3.27 dB. Residual variance is real scene change, not noise.</figcaption>
+  </figure>
+
+  <div class="method-notes" style="margin-top:18px">
+    <div class="mn"><div class="mn-k">Collection</div><div class="mn-v">sentinel-1-rtc (Planetary Computer STAC)</div></div>
+    <div class="mn"><div class="mn-k">Polarisation</div><div class="mn-v">VV</div></div>
+    <div class="mn"><div class="mn-k">Pixel spacing</div><div class="mn-v">10 m (EPSG:32631)</div></div>
+    <div class="mn"><div class="mn-k">Pre-event</div><div class="mn-v"><b>2024-10-20</b>, orbit 110, descending</div></div>
+    <div class="mn"><div class="mn-k">Post-event</div><div class="mn-v"><b>2024-11-01</b>, orbit 110, descending</div></div>
+    <div class="mn"><div class="mn-k">AOI</div><div class="mn-v">0.4 x 0.3 deg centred on Valencia coastal plain</div></div>
+    <div class="mn"><div class="mn-k">Valid pixels</div><div class="mn-v">6,639,201 (after nodata masking)</div></div>
+    <div class="mn"><div class="mn-k">Multilooking</div><div class="mn-v">49 looks (7x7 averaging). Spread: 4.17 &rarr; 3.27 dB</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- THRESHOLD SENSITIVITY -->
+<section>
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Threshold sensitivity</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">The literature default of -3 dB returns 70 km&sup2;; the statistically motivated cut at median minus 2 sigma (-5.82 dB) returns 40 km&sup2; across 70 patches. The range between thresholds is the method's honest uncertainty.</p>
+  <div class="method-notes">
+    <div class="mn"><div class="mn-k">-3 dB</div><div class="mn-v">Convention threshold, <b>70.45 km&sup2;</b> across 368 patches (min 1 ha)</div></div>
+    <div class="mn"><div class="mn-k">Otsu</div><div class="mn-v">Automatic optimum at -3.57 dB, <b>50.96 km&sup2;</b> across 51 patches (min 5 ha)</div></div>
+    <div class="mn"><div class="mn-k">Median-2sig</div><div class="mn-v">Statistical cut at -5.82 dB, <b>40.03 km&sup2;</b> across 70 patches (min 1 ha)</div></div>
+    <div class="mn"><div class="mn-k">Median-3sig</div><div class="mn-v">Conservative at -9.08 dB, <b>21.11 km&sup2;</b> across 44 patches (min 10 ha)</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DECISIONS & LIMITS -->
+<section>
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Scene pair</div><div class="mn-v"><b>Same relative orbit, even at five days cost.</b> Geometric match beats temporal proximity. 42% reduction in spread.</div></div>
+      <div class="mn"><div class="mn-k">Product level</div><div class="mn-v"><b>RTC rather than raw GRD.</b> Terrain correction removes slope-induced modulation before the ratio.</div></div>
+      <div class="mn"><div class="mn-k">Data access</div><div class="mn-v"><b>Windowed COG reads over STAC.</b> Only AOI pixels cross the network. Full rerun in under a minute.</div></div>
+      <div class="mn"><div class="mn-k">Reporting</div><div class="mn-v"><b>A range, not a number.</b> Four thresholds published together because the spread is the honest uncertainty.</div></div>
+      <div class="mn"><div class="mn-k">Patch filter</div><div class="mn-v"><b>Minimum 1 ha removes 3,000 scatter clusters and 6 km&sup2;.</b> Stated explicitly because it shifts the headline as much as the dB cut.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">No validation</div><div class="mn-v">No reference data exists for this AOI. Sensitivity analysis stands in; it is weaker than a field survey.</div></div>
+      <div class="mn"><div class="mn-k">Urban flood</div><div class="mn-v">Double-bounce in built-up areas raises backscatter. Urban inundation is invisible to this method.</div></div>
+      <div class="mn"><div class="mn-k">Vegetation</div><div class="mn-v">Volume scattering from reeds and crops masks standing water beneath. Albufera margins underestimated.</div></div>
+      <div class="mn"><div class="mn-k">Ag. change</div><div class="mn-v">October harvest/tillage creates non-flood backscatter loss at looser thresholds. Single-scene baseline cannot separate them.</div></div>
+      <div class="mn"><div class="mn-k">Timing</div><div class="mn-v">Post-event scene is 1 November, three days after peak. Fast-draining areas already receded.</div></div>
+      <div class="mn"><div class="mn-k">Wind</div><div class="mn-v">Roughened water raises backscatter back toward the threshold. Windy flood areas are missed.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 05 / SAR Flood Mapping, Valencia</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
+<script src="../../assets/js/viz.js"></script>
+<script>
+var E = Viz.esc, F = Viz.fmt;
+
+(function () {
+  var TOKEN = 'pk.REDACTED_MAPBOX_TOKEN';
+  var level = 'inclusive', ready = false, map = null;
+  var META = {inclusive:{n:70,km2:40.03,db:-5.82,min:1}, conservative:{n:44,km2:21.11,db:-9.08,min:10}};
+
+  function readout() {
+    var m = META[level];
+    document.getElementById('readout').innerHTML =
+      '<div class="r"><div class="rv">' + F(m.km2,1) + '<span style="font-size:.6em;color:var(--ink-3)"> km&sup2;</span></div><div class="rk">Detected area</div></div>' +
+      '<div class="r"><div class="rv">' + m.n + '</div><div class="rk">Patches</div></div>' +
+      '<div class="r"><div class="rv">' + F(m.db,2) + '<span style="font-size:.6em;color:var(--ink-3)"> dB</span></div><div class="rk">Threshold</div></div>' +
+      '<div class="r"><div class="rv">' + m.min + '<span style="font-size:.6em;color:var(--ink-3)"> ha</span></div><div class="rk">Min patch</div></div>';
+  }
+  readout();
+
+  if (!window.mapboxgl || !TOKEN) {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('map-nokey').style.display = 'block';
+    return;
+  }
+  mapboxgl.accessToken = TOKEN;
+  map = new mapboxgl.Map({container:'map', style:'mapbox://styles/mapbox/dark-v11',
+    center:[-0.39,39.34], zoom:10.2});
+  map.addControl(new mapboxgl.NavigationControl({showCompass:false}), 'top-right');
+  map.on('error', function () {
+    document.getElementById('map').style.display = 'none';
+    document.getElementById('map-nokey').style.display = 'block';
+  });
+  map.on('load', function () {
+    map.addSource('f', {type:'geojson', data:'data/flood_extent.geojson'});
+    map.addLayer({id:'f-fill', type:'fill', source:'f',
+      filter:['==',['get','level'],level],
+      paint:{'fill-color':['interpolate',['linear'],['get','area_ha'],
+              1,'#9ec5f4', 20,'#3987e5', 100,'#256abf', 400,'#0d366b'],
+             'fill-opacity':0.78}});
+    map.addLayer({id:'f-line', type:'line', source:'f',
+      filter:['==',['get','level'],level],
+      paint:{'line-color':'#cde2fb','line-width':0.5,'line-opacity':0.5}});
+    var pop = new mapboxgl.Popup({closeButton:false});
+    map.on('mousemove','f-fill', function (e) {
+      var p = e.features[0].properties;
+      map.getCanvas().style.cursor='pointer';
+      pop.setLngLat(e.lngLat).setHTML(
+        '<div style="font-family:IBM Plex Mono,monospace;font-size:11px;line-height:1.7;color:#111">' +
+        '<b>' + F(p.area_ha,1) + ' ha</b><br>threshold ' + F(p.threshold_db,2) + ' dB</div>').addTo(map);
+    });
+    map.on('mouseleave','f-fill', function(){ map.getCanvas().style.cursor=''; pop.remove(); });
+    ready = true;
+  });
+  document.querySelectorAll('[data-lvl]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.querySelectorAll('[data-lvl]').forEach(function (x) { x.removeAttribute('aria-pressed'); });
+      b.setAttribute('aria-pressed','true');
+      level = b.dataset.lvl; readout();
+      if (ready) { map.setFilter('f-fill',['==',['get','level'],level]);
+                   map.setFilter('f-line',['==',['get','level'],level]); }
+    });
+  });
+})();
+
+Viz.init(document);
+</script>
+</body>
+</html>

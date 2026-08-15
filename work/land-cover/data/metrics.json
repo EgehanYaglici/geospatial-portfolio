@@ -1,0 +1,175 @@
+{
+  "overall_accuracy": 0.7078,
+  "mean_iou": 0.5309,
+  "mean_f1": 0.552,
+  "per_class": [
+    {
+      "name": "Cropland",
+      "iou": 0.4767,
+      "f1": 0.6456,
+      "support": 4533713
+    },
+    {
+      "name": "Forest",
+      "iou": 0.7027,
+      "f1": 0.8254,
+      "support": 6552383
+    },
+    {
+      "name": "Vegetation",
+      "iou": 0.2149,
+      "f1": 0.3537,
+      "support": 5450826
+    },
+    {
+      "name": "Urban/Road",
+      "iou": 0.3803,
+      "f1": 0.5511,
+      "support": 3187146
+    },
+    {
+      "name": "Industrial",
+      "iou": 0.0,
+      "f1": 0.0,
+      "support": 0
+    },
+    {
+      "name": "Water",
+      "iou": 0.8801,
+      "f1": 0.9362,
+      "support": 7407836
+    }
+  ],
+  "training_epochs": 20,
+  "best_epoch": 19,
+  "training_samples": 1491,
+  "val_samples": 165,
+  "test_samples": 465,
+  "training_duration_min": 25.33,
+  "model_arch": "U-Net (ResNet18 encoder, ImageNet init \u2192 WorldCover fine-tune)",
+  "dataset": "ESA WorldCover 2021 + Sentinel-2 L2A (8 European areas)",
+  "device": "mps",
+  "best_val_miou": 0.551,
+  "area_stats": {
+    "Bavaria": {
+      "patches": 298,
+      "split": "train",
+      "s2_id": "S2A_MSIL2A_20230811T101031_R022_T32UQV_20230811T193650",
+      "cloud_cover": 0.001473,
+      "class_dist": {
+        "0": 662708,
+        "1": 710652,
+        "2": 202028,
+        "3": 62916,
+        "5": 96
+      },
+      "error": null
+    },
+    "Paris": {
+      "patches": 325,
+      "split": "train",
+      "s2_id": "S2B_MSIL2A_20230821T105629_R094_T31UDP_20230821T182038",
+      "cloud_cover": 0.001571,
+      "class_dist": {
+        "0": 64705,
+        "1": 710406,
+        "2": 205556,
+        "3": 615343,
+        "5": 42390
+      },
+      "error": null
+    },
+    "Netherlands": {
+      "patches": 254,
+      "split": "train",
+      "s2_id": "S2A_MSIL2A_20230820T103631_R008_T31UFT_20241023T045441",
+      "cloud_cover": 1.266592,
+      "class_dist": {
+        "0": 30321,
+        "1": 229915,
+        "2": 934516,
+        "3": 201316,
+        "5": 242332
+      },
+      "error": null
+    },
+    "Mazury": {
+      "patches": 230,
+      "split": "train",
+      "s2_id": "S2A_MSIL2A_20230507T095031_R079_T34UEF_20230507T152700",
+      "cloud_cover": 0.001596,
+      "class_dist": {
+        "0": 233199,
+        "1": 908725,
+        "2": 320329,
+        "3": 6299,
+        "5": 169848
+      },
+      "error": null
+    },
+    "Ebro": {
+      "patches": 188,
+      "split": "train",
+      "s2_id": "S2A_MSIL2A_20230823T104631_R051_T31TBF_20230823T193053",
+      "cloud_cover": 0.002664,
+      "class_dist": {
+        "0": 410379,
+        "1": 256771,
+        "2": 303880,
+        "3": 12038,
+        "5": 1891
+      },
+      "error": null
+    },
+    "Po_Delta": {
+      "patches": 361,
+      "split": "train",
+      "s2_id": "S2A_MSIL2A_20230821T100601_R022_T33TUK_20241024T123213",
+      "cloud_cover": 0.000397,
+      "class_dist": {
+        "0": 25390,
+        "1": 2286,
+        "2": 7751,
+        "3": 355,
+        "5": 1602618
+      },
+      "error": null
+    },
+    "Stockholm": {
+      "patches": 283,
+      "split": "test",
+      "s2_id": "S2B_MSIL2A_20230710T101609_R065_T33VXF_20230710T162051",
+      "cloud_cover": 0.249621,
+      "class_dist": {
+        "0": 52111,
+        "1": 862515,
+        "2": 183172,
+        "3": 58302,
+        "5": 482300
+      },
+      "error": null
+    },
+    "Thessaly": {
+      "patches": 182,
+      "split": "test",
+      "s2_id": "S2B_MSIL2A_20230821T091559_R093_T34SFJ_20230822T220858",
+      "cloud_cover": 0.003228,
+      "class_dist": {
+        "0": 1084747,
+        "1": 60256,
+        "2": 350529,
+        "3": 127086,
+        "5": 15782
+      },
+      "error": null
+    }
+  },
+  "worldcover_class_dist": {
+    "Cropland": 4533713,
+    "Forest": 6552383,
+    "Vegetation": 5450826,
+    "Urban/Road": 3187146,
+    "Industrial": 0,
+    "Water": 7407836
+  }
+}

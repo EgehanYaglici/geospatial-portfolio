@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OSM ETL Pipeline | Egehan Yaglici</title>
+<meta name="description" content="386,094 OpenStreetMap features through a validating pipeline with zero repairs needed, plus a format benchmark that revealed a cold-start artefact.">
+<meta property="og:title" content="OSM ETL Pipeline">
+<meta property="og:description" content="386,094 features, zero invalid geometries, zero duplicates. A validating pipeline over Amsterdam's OpenStreetMap extract.">
+<meta property="og:type" content="article">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3987e5; --accent-dim: rgba(57,135,229,0.15); --orange: #d95926; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero split */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 24px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.hero-left .case-id {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+}
+.hero-left h1 {
+  font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em;
+  line-height: 1.2; color: var(--ink); margin-bottom: 12px;
+}
+.hero-left .desc {
+  font-size: 13.5px; color: var(--ink-2); line-height: 1.6; margin-bottom: 10px;
+}
+.hero-left .desc-sm {
+  font-size: 12px; color: var(--ink-3); line-height: 1.55; margin-bottom: 18px;
+}
+.tags { display: flex; gap: 5px; flex-wrap: wrap; }
+.tags .t {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em;
+  color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px;
+}
+
+/* Hero image */
+.hero-img {
+  border: 1px solid var(--rule-strong); overflow: hidden;
+}
+.hero-img img { width: 100%; height: auto; display: block; }
+.hero-img figcaption {
+  font-size: 11px; color: var(--ink-3); padding: 8px 12px;
+  border-top: 1px solid var(--rule); background: var(--surface-1);
+}
+.hero-img .fno {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); margin-right: 5px;
+}
+
+/* Figures */
+.divider { height: 1px; background: var(--rule); margin-block: 32px; }
+.fig-row {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  border: 1px solid var(--rule-strong);
+}
+@media (max-width: 640px) { .fig-row { grid-template-columns: repeat(3, 1fr); } }
+.fig-cell {
+  padding: 16px 12px; text-align: center;
+  border-right: 1px solid var(--rule);
+}
+.fig-cell:last-child { border-right: none; }
+.fig-num {
+  font-family: var(--mono); font-size: 1.4rem; font-weight: 500;
+  color: var(--ink); line-height: 1;
+}
+.fig-num .u { font-size: .5em; color: var(--ink-3); margin-left: 2px; }
+.fig-num.highlight { color: var(--orange); }
+.fig-label {
+  font-family: var(--mono); font-size: 9px; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 8px;
+}
+
+/* Section header */
+.sh { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sh-no {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  border: 1px solid var(--accent-dim); padding: 3px 8px; letter-spacing: .06em;
+}
+.sh-title {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink);
+}
+
+/* Notes */
+.method-notes { display: grid; gap: 0; border-top: 1px solid var(--rule); }
+.mn {
+  display: grid; grid-template-columns: 110px minmax(0,1fr); gap: 18px;
+  padding: 12px 0; border-bottom: 1px solid var(--rule);
+}
+@media (max-width: 640px) { .mn { grid-template-columns: 1fr; gap: 4px; } }
+.mn-k {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--accent); padding-top: 2px;
+}
+.mn-v { font-size: 13.5px; color: var(--ink-2); line-height: 1.55; }
+.mn-v b { color: var(--ink); font-weight: 500; }
+.two-notes { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two-notes { grid-template-columns: 1fr; gap: 0; } }
+
+/* Charts */
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media (max-width: 700px) { .two { grid-template-columns: 1fr; gap: 24px; } }
+
+/* Tables */
+.tbl-wrap { overflow-x: auto; }
+.tbl-wrap table.data { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.tbl-wrap table.data th.tbl-wrap table.data td { padding: 8px 10px; border-bottom: 1px solid var(--rule); text-align: left; }
+.tbl-wrap table.data th { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; color: var(--ink-3); }
+.tbl-wrap table.data .num { text-align: right; font-variant-numeric: tabular-nums; }
+.tbl-wrap table.data .total td { font-weight: 500; color: var(--ink); }
+
+/* Footer */
+.foot {
+  border-top: 1px solid var(--rule); padding: 20px 0 32px;
+  display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+}
+.foot-label { font-family: var(--mono); font-size: 10px; color: var(--ink-4); letter-spacing: .06em; }
+.foot-links { display: flex; gap: 16px; }
+.foot-links a { font-size: 12px; color: var(--ink-3); }
+.foot-links a:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Case 03</span>
+    <div class="nav-links"><a href="#pipeline">Pipeline</a><a href="#results">Results</a><a href="#decisions">Decisions</a><a href="../../">All work</a></div>
+  </div>
+</nav>
+
+<div class="page">
+
+<!-- HERO: left text + right image -->
+<div class="hero-row">
+  <div class="hero-left">
+    <div class="case-id">Case 03 &middot; Data Engineering</div>
+    <h1>OSM ETL Pipeline</h1>
+    <p class="desc">Raw OpenStreetMap data is messy: mixed coordinate systems, invalid geometries, duplicate features, inconsistent attribute schemas. This study builds a validating ETL pipeline that takes 386,094 features across eight Amsterdam layers (buildings, roads, water, parks, POIs, transit, boundaries) and normalises them into clean GeoParquet.</p>
+    <p class="desc" style="margin-top:10px">The finding: zero invalid geometries, zero repairs needed. OSM Amsterdam is already remarkably clean.</p>
+    <div class="tags" style="margin-top:16px">
+      <span class="t">GeoPandas</span><span class="t">Shapely 2</span><span class="t">OSMnx</span><span class="t">GeoParquet</span><span class="t">EPSG:28992</span>
+    </div>
+  </div>
+  <figure class="hero-img">
+    <img src="data/layers.png" alt="Eight Amsterdam OSM layers stacked: buildings, roads, water, parks, POIs, transit, boundary" loading="eager">
+    <figcaption><span class="fno">Preview</span>Eight thematic layers extracted from OpenStreetMap Amsterdam, stacked to show spatial coverage.</figcaption>
+  </figure>
+</div>
+
+<!-- FIGURES -->
+<div class="fig-row">
+  <div class="fig-cell"><div class="fig-num">386,094</div><div class="fig-label">Features</div></div>
+  <div class="fig-cell"><div class="fig-num">8</div><div class="fig-label">Layers</div></div>
+  <div class="fig-cell"><div class="fig-num highlight">0</div><div class="fig-label">Invalid</div></div>
+  <div class="fig-cell"><div class="fig-num">0</div><div class="fig-label">Repaired</div></div>
+  <div class="fig-cell"><div class="fig-num">100<span class="u">%</span></div><div class="fig-label">Retained</div></div>
+  <div class="fig-cell"><div class="fig-num">200<span class="u">MB</span></div><div class="fig-label">Output</div></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- 01 PIPELINE STAGES -->
+<section id="pipeline">
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">Pipeline Stages</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Each layer passes through eight deterministic stages. The pipeline is idempotent and restartable at any stage, so a crash mid-run resumes from the last completed step without re-downloading.</p>
+  <div class="method-notes">
+    <div class="mn"><div class="mn-k">01 Acquire</div><div class="mn-v"><b>OSMnx over Overpass</b>, one call per layer. Bounding box covers Amsterdam municipality.</div></div>
+    <div class="mn"><div class="mn-k">02 Inspect</div><div class="mn-v">Column types, CRS, validity flags written to <b>JSON sidecar</b> for each layer.</div></div>
+    <div class="mn"><div class="mn-k">03 Normalise</div><div class="mn-v">Reproject to <b>EPSG:28992</b> (Dutch metric). All downstream analytics in metres.</div></div>
+    <div class="mn"><div class="mn-k">04 Validate</div><div class="mn-v"><b>is_valid</b> on every geometry. Flags self-intersections, ring errors, degenerate polygons.</div></div>
+    <div class="mn"><div class="mn-k">05 Repair</div><div class="mn-v"><b>make_valid</b> on flagged geometries. In practice: none flagged across all eight layers.</div></div>
+    <div class="mn"><div class="mn-k">06 Transform</div><div class="mn-v">Area derivation, <b>WKB deduplication</b>, sparse column drop. Geometry is the stable identity.</div></div>
+    <div class="mn"><div class="mn-k">07 Export</div><div class="mn-v">Triple output: <b>GeoJSON + GeoPackage + GeoParquet</b>. Columnar compression cuts size 89%.</div></div>
+    <div class="mn"><div class="mn-k">08 Report</div><div class="mn-v">Per-layer QA summary as machine-readable CSV. Zero-row reports are published, because they are real measurements.</div></div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 02 RESULTS & QA -->
+<section id="results">
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">Results &amp; QA</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Buildings and walking network dominate by three orders of magnitude. All layers pass validation with zero repairs, zero duplicates, 100% feature retention.</p>
+
+  <div class="two">
+    <div>
+      <div class="chart">
+        <div class="chart-head">
+          <span class="chart-title">Features by layer</span>
+          <button class="tv-btn" data-tableview="tv-qa" data-label-show="Table" data-label-hide="Hide">Table</button>
+        </div>
+        <div class="chart-sub">Log scale. Buildings and walking network dominate.</div>
+        <div class="bars" id="qa-bars" style="--barlabel:104px"></div>
+      </div>
+      <div class="tv mt16" id="tv-qa" hidden>
+        <div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Layer</th><th>Features</th><th>Size</th></tr></thead>
+          <tbody id="tv-qa-body"></tbody></table></div>
+      </div>
+    </div>
+    <div>
+      <div class="chart">
+        <div class="chart-head">
+          <span class="chart-title">File size by format (POI layer)</span>
+          <button class="tv-btn" data-tableview="tv-size" data-label-show="Table" data-label-hide="Hide">Table</button>
+        </div>
+        <div class="chart-sub">GeoParquet is 89% smaller than GeoJSON through columnar compression.</div>
+        <div class="bars" id="size-bars" style="--barlabel:104px"></div>
+      </div>
+      <div class="tv mt16" id="tv-size" hidden>
+        <div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Format</th><th>Size MB</th></tr></thead>
+          <tbody id="tv-size-body"></tbody></table></div>
+      </div>
+
+      <div class="chart" style="margin-top:24px">
+        <div class="chart-head">
+          <span class="chart-title">Read time (warm process)</span>
+          <button class="tv-btn" data-tableview="tv-read" data-label-show="Table" data-label-hide="Hide">Table</button>
+        </div>
+        <div class="chart-sub">Parks and transit layers, after pyarrow is loaded.</div>
+        <div class="bars" id="read-bars" style="--barlabel:104px"></div>
+      </div>
+      <div class="tv mt16" id="tv-read" hidden>
+        <div class="tbl-wrap"><table class="data">
+          <thead><tr><th>Layer + Format</th><th>Read s</th><th>Write s</th><th>Size MB</th></tr></thead>
+          <tbody id="tv-read-body"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Layer</th><th>In</th><th>Out</th><th>Invalid</th><th>Repaired</th><th>Duplicates</th><th>Size</th></tr>
+        </thead>
+        <tbody id="qa-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div style="margin-top:28px">
+    <div class="tbl-wrap">
+      <table class="data">
+        <thead>
+          <tr><th>Layer</th><th>Format</th><th>Size MB</th><th>Write s</th><th>Read s</th></tr>
+        </thead>
+        <tbody id="fmt-table-body"></tbody>
+      </table>
+    </div>
+    <p style="font-size:11px;color:var(--ink-3);margin-top:8px;font-family:var(--mono)">
+      Bold values indicate cold-start measurements dominated by pyarrow import time.
+    </p>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- 03 DECISIONS & LIMITS -->
+<section id="decisions">
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Decisions &amp; Limits</span></div>
+  <p style="font-size:13px;color:var(--ink-2);margin-bottom:14px;max-width:60ch">Design choices that shaped the pipeline, and known boundaries of this single-city extract.</p>
+  <div class="two-notes">
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">Reporting</div><div class="mn-v"><b>Publish the empty QA report.</b> Zero repairs is a real measurement. Inventing failures for narrative would be contradicted by the CSV on disk.</div></div>
+      <div class="mn"><div class="mn-k">Benchmarking</div><div class="mn-v"><b>Keep the anomaly, explain it.</b> The 3.531s Parquet read is a pyarrow import cost, not a format problem. The pipeline now reports warm and cold separately.</div></div>
+      <div class="mn"><div class="mn-k">Repair policy</div><div class="mn-v"><b>make_valid, never drop.</b> Dropping invalid geometries silently loses data. make_valid inserts minimum vertices to resolve self-intersections.</div></div>
+      <div class="mn"><div class="mn-k">Projection</div><div class="mn-v"><b>Metric CRS in the middle.</b> EPSG:28992 for analytics, EPSG:4326 only at export. Areas in square degrees are a category error.</div></div>
+      <div class="mn"><div class="mn-k">Deduplication</div><div class="mn-v"><b>Hash the WKB, not attributes.</b> Geometry is the stable identity, since two contributors may disagree on names but agree on outlines.</div></div>
+    </div>
+    <div class="method-notes">
+      <div class="mn"><div class="mn-k">One extract</div><div class="mn-v">Zero invalid geometries is specific to Amsterdam via OSMnx on one day. Different cities or raw Overpass responses would likely not be this clean.</div></div>
+      <div class="mn"><div class="mn-k">No topology</div><div class="mn-v">Every geometry is individually valid, but no checks for overlapping parks, road network connectivity, or intersecting footprints.</div></div>
+      <div class="mn"><div class="mn-k">Full refresh</div><div class="mn-v">Every run re-extracts everything. At national scale, incremental updates from OSM diff feeds would be required.</div></div>
+      <div class="mn"><div class="mn-k">Overpass</div><div class="mn-v">Large bounding boxes or frequent runs hit Overpass quotas. Production would use a local planet extract.</div></div>
+    </div>
+  </div>
+</section>
+
+<footer class="foot">
+  <span class="foot-label">Case 03 / OpenStreetMap ETL</span>
+  <div class="foot-links">
+    <a href="../../">All work</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">Source</a>
+  </div>
+</footer>
+
+</div><!-- /page -->
+
+<script src="../../assets/js/viz.js"></script>
+<script>
+var E = Viz.esc, F = Viz.fmt;
+
+/* qa_summary.csv */
+var QA = [
+  {l:'buildings',   n:197578, mb:149.30},
+  {l:'roads_walk',  n:143034, mb:34.78},
+  {l:'roads_drive', n:29835,  mb:8.29},
+  {l:'pois',        n:7583,   mb:0.88},
+  {l:'water',       n:6154,   mb:5.54},
+  {l:'transit',     n:1641,   mb:0.28},
+  {l:'parks',       n:268,    mb:0.38},
+  {l:'boundary',    n:1,      mb:0.17}
+];
+
+/* format_benchmarks.csv */
+var FMT = [
+  {l:'pois',    f:'GeoJSON',    mb:2.105, w:0.103, r:0.089, cold:false},
+  {l:'pois',    f:'GeoPackage', mb:1.203, w:0.085, r:0.029, cold:false},
+  {l:'pois',    f:'GeoParquet', mb:0.235, w:2.221, r:3.531, cold:true},
+  {l:'parks',   f:'GeoJSON',    mb:0.702, w:0.037, r:0.019, cold:false},
+  {l:'parks',   f:'GeoPackage', mb:0.371, w:0.017, r:0.005, cold:false},
+  {l:'parks',   f:'GeoParquet', mb:0.219, w:0.006, r:0.004, cold:false},
+  {l:'transit', f:'GeoJSON',    mb:0.475, w:0.021, r:0.021, cold:false},
+  {l:'transit', f:'GeoPackage', mb:0.355, w:0.023, r:0.010, cold:false},
+  {l:'transit', f:'GeoParquet', mb:0.059, w:0.005, r:0.004, cold:false}
+];
+
+/* Pipeline stages */
+var STAGES = [
+  {n:'01', t:'Acquire',   d:'OSMnx over Overpass, one call per layer'},
+  {n:'02', t:'Inspect',   d:'Column types, CRS, validity into JSON'},
+  {n:'03', t:'Normalise', d:'Reproject to EPSG:28992 (Dutch metric)'},
+  {n:'04', t:'Validate',  d:'is_valid on every geometry'},
+  {n:'05', t:'Repair',    d:'make_valid on flagged (none flagged)'},
+  {n:'06', t:'Transform', d:'Area derivation, WKB dedup, sparse drop'},
+  {n:'07', t:'Export',    d:'GeoJSON + GeoPackage + GeoParquet'},
+  {n:'08', t:'Report',    d:'Per-layer QA summary, machine-readable'}
+];
+
+(function () {
+  /* QA bars */
+  var lmax = Math.log10(197578);
+  document.getElementById('qa-bars').innerHTML = QA.map(function (d) {
+    var w = Math.max(Math.log10(Math.max(d.n, 1)) / lmax * 100, 1.2);
+    return '<div class="bar-row"><span class="bar-lab mono" style="font-size:11.5px">' + E(d.l) + '</span>' +
+      '<div class="bar-track"><div class="bar-fill" data-w="' + w + '%" data-tip-title="' + E(d.l) + '" data-tip-rows=\'' +
+      JSON.stringify([
+        {k:'Features in', v:d.n.toLocaleString('en-GB')},
+        {k:'Features out', v:d.n.toLocaleString('en-GB')},
+        {k:'Invalid', v:'0'}, {k:'Duplicates', v:'0'},
+        {k:'Size', v:F(d.mb,2) + ' MB'}
+      ]) + '\'></div></div><span class="bar-val">' + d.n.toLocaleString('en-GB') + '</span></div>';
+  }).join('');
+  document.getElementById('tv-qa-body').innerHTML = QA.map(function (d) {
+    return '<tr><td>' + E(d.l) + '</td><td class="num">' + d.n.toLocaleString('en-GB') + '</td><td class="num">' + F(d.mb,2) + ' MB</td></tr>';
+  }).join('');
+
+  /* Size bars */
+  var pois = FMT.filter(function (d) { return d.l === 'pois'; });
+  var smax = 2.2;
+  document.getElementById('size-bars').innerHTML = pois.map(function (d, i) {
+    return '<div class="bar-row"><span class="bar-lab">' + E(d.f) + '</span>' +
+      '<div class="bar-track"><div class="bar-fill' + (i === 2 ? '' : ' s2') + '" data-w="' + (d.mb / smax * 100) + '%"' +
+      ' data-tip-title="' + E(d.f) + ', pois" data-tip-rows=\'' +
+      JSON.stringify([{k:'Size', v:F(d.mb,3) + ' MB'}]) +
+      '\'></div></div><span class="bar-val">' + F(d.mb,2) + ' MB</span></div>';
+  }).join('');
+  document.getElementById('tv-size-body').innerHTML = pois.map(function (d) {
+    return '<tr><td>' + E(d.f) + '</td><td class="num">' + F(d.mb,3) + '</td></tr>';
+  }).join('');
+
+  /* Read time bars (warm only) */
+  var warm = FMT.filter(function (d) { return !d.cold && d.l !== 'pois'; });
+  var rmax = 0.022;
+  document.getElementById('read-bars').innerHTML = warm.map(function (d) {
+    var isPq = d.f === 'GeoParquet';
+    return '<div class="bar-row"><span class="bar-lab mono" style="font-size:11px">' + E(d.l) + ' ' + E(d.f.slice(0,7)) + '</span>' +
+      '<div class="bar-track"><div class="bar-fill' + (isPq ? '' : ' s2') + '" data-w="' +
+      Math.max(d.r / rmax * 100, 1.5) + '%" data-tip-title="' + E(d.l) + ', ' + E(d.f) + '" data-tip-rows=\'' +
+      JSON.stringify([{k:'Read', v:F(d.r,3) + ' s'}, {k:'Write', v:F(d.w,3) + ' s'}, {k:'Size', v:F(d.mb,3) + ' MB'}]) +
+      '\'></div></div><span class="bar-val">' + F(d.r,3) + ' s</span></div>';
+  }).join('');
+  document.getElementById('tv-read-body').innerHTML = warm.map(function (d) {
+    return '<tr><td>' + E(d.l) + ' ' + E(d.f) + '</td><td class="num">' + F(d.r,3) + '</td><td class="num">' + F(d.w,3) + '</td><td class="num">' + F(d.mb,3) + '</td></tr>';
+  }).join('');
+
+  /* QA table */
+  document.getElementById('qa-table-body').innerHTML = QA.map(function (d) {
+    return '<tr><td>' + E(d.l) + '</td><td class="num">' + d.n.toLocaleString('en-GB') + '</td><td class="num">' +
+      d.n.toLocaleString('en-GB') + '</td><td class="num">0</td><td class="num">0</td><td class="num">0</td>' +
+      '<td class="num">' + F(d.mb,2) + ' MB</td></tr>';
+  }).join('') + '<tr class="total"><td>Total</td><td class="num">386,094</td><td class="num">386,094</td>' +
+    '<td class="num">0</td><td class="num">0</td><td class="num">0</td><td class="num">199.6 MB</td></tr>';
+
+  /* Format benchmarks table */
+  document.getElementById('fmt-table-body').innerHTML = FMT.map(function (d) {
+    var b = d.cold ? function (s) { return '<b style="color:var(--warn)">' + s + '</b>'; } : function (s) { return s; };
+    return '<tr><td>' + E(d.l) + '</td><td class="num">' + E(d.f) + '</td><td class="num">' + F(d.mb,3) +
+      '</td><td class="num">' + b(F(d.w,3)) + '</td><td class="num">' + b(F(d.r,3)) + '</td></tr>';
+  }).join('');
+})();
+
+Viz.init(document);
+</script>
+</body>
+</html>

@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WebGIS Road: Collaborative Road Network Editor | Egehan Yaglici</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../../assets/css/base.css">
+<style>
+:root { --accent: #3B82F6; --green: #10B981; --amber: #F59E0B; }
+
+.page { max-width: 980px; margin: 0 auto; padding-inline: 32px; }
+@media (max-width: 640px) { .page { padding-inline: 18px; } }
+
+/* Hero */
+.hero-row {
+  display: grid; grid-template-columns: 340px minmax(0,1fr); gap: 32px;
+  align-items: start; padding-top: 36px; padding-bottom: 28px;
+}
+@media (max-width: 860px) { .hero-row { grid-template-columns: 1fr; } }
+
+.case-id { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 14px; }
+h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1.2; color: var(--ink); margin-bottom: 12px; }
+.desc { font-size: 13.5px; color: var(--ink-2); line-height: 1.65; margin-bottom: 10px; }
+.tags { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 20px; }
+.tags .t { font-family: var(--mono); font-size: 9.5px; letter-spacing: .04em; color: var(--ink-3); border: 1px solid var(--rule-strong); padding: 3px 8px; }
+
+.live-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 8px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  background: rgba(59,130,246,0.12); border: 1px solid rgba(59,130,246,0.35);
+  color: var(--accent); text-decoration: none; transition: background .15s, border-color .15s;
+}
+.live-btn:hover { background: rgba(59,130,246,0.2); border-color: rgba(59,130,246,0.6); }
+
+.hero-img-box { border: 1px solid var(--rule-strong); overflow: hidden; }
+.hero-img-box img { width: 100%; display: block; }
+.hero-img-box figcaption { font-size: 11px; color: var(--ink-3); padding: 8px 12px; border-top: 1px solid var(--rule); background: var(--surface-1); }
+
+.rule { height: 1px; background: var(--rule); margin-block: 32px; }
+
+.sh { display: flex; align-items: baseline; gap: 10px; margin-bottom: 14px; margin-top: 32px; }
+.sh-no { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; color: var(--ink-3); min-width: 22px; }
+.sh-title { font-size: 13px; font-weight: 600; color: var(--ink); letter-spacing: -.01em; }
+
+.body-text { font-size: 13.5px; color: var(--ink-2); line-height: 1.72; max-width: 68ch; }
+.body-text + .body-text { margin-top: 10px; }
+
+/* Key metrics row */
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--rule-strong); border: 1px solid var(--rule-strong); margin-top: 18px; }
+.metric { background: var(--surface-1); padding: 14px 16px; }
+.metric-k { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 4px; }
+.metric-v { font-size: 1.4rem; font-weight: 600; color: var(--ink); letter-spacing: -.02em; }
+.metric-u { font-size: 10.5px; color: var(--ink-3); margin-top: 2px; }
+@media (max-width: 640px) { .metrics { grid-template-columns: 1fr 1fr; } }
+
+/* Two-col layout */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+@media (max-width: 640px) { .two-col { grid-template-columns: 1fr; } }
+
+/* Feature block */
+.feature { border: 1px solid var(--rule-strong); background: var(--surface-1); padding: 18px; }
+.feature-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; }
+.feature-title { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; letter-spacing: -.01em; }
+.feature-desc { font-size: 12px; color: var(--ink-3); line-height: 1.6; }
+
+/* Flow diagram */
+.flow { display: flex; align-items: center; gap: 0; margin-top: 16px; flex-wrap: wrap; }
+.flow-step { display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 90px; padding: 12px 8px; border: 1px solid var(--rule-strong); background: var(--surface-1); text-align: center; }
+.flow-step-n { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
+.flow-step-label { font-size: 11px; font-weight: 600; color: var(--ink); }
+.flow-arrow { font-size: 11px; color: var(--ink-4); padding: 0 4px; flex-shrink: 0; }
+
+/* Stack table */
+.stack-table { width: 100%; border-collapse: collapse; margin-top: 14px; }
+.stack-table td { padding: 8px 12px; border-bottom: 1px solid var(--rule); font-size: 12.5px; vertical-align: top; }
+.stack-table td:first-child { font-family: var(--mono); font-size: 11px; color: var(--ink-3); white-space: nowrap; width: 140px; }
+.stack-table td:last-child { color: var(--ink-2); }
+.stack-table tr:last-child td { border-bottom: none; }
+
+/* Scenario cards */
+.scenarios { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px; }
+@media (max-width: 640px) { .scenarios { grid-template-columns: 1fr; } }
+.scenario { border: 1px solid var(--rule-strong); background: var(--surface-1); padding: 16px; }
+.scenario-label { font-family: var(--mono); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 8px; }
+.scenario-title { font-size: 12.5px; font-weight: 600; color: var(--ink); margin-bottom: 6px; }
+.scenario-steps { list-style: none; padding: 0; }
+.scenario-steps li { font-size: 11.5px; color: var(--ink-3); padding: 3px 0; display: flex; align-items: center; gap: 7px; }
+.scenario-steps li::before { content: ""; width: 5px; height: 5px; border-radius: 50%; background: var(--rule-strong); flex-shrink: 0; }
+
+/* Status badge */
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 600; }
+.badge-blue { background: rgba(59,130,246.15); border: 1px solid rgba(59,130,246.3); color: #60A5FA; }
+.badge-green { background: rgba(16,185,129.15); border: 1px solid rgba(16,185,129.3); color: #34D399; }
+.badge-amber { background: rgba(245,158,11.15); border: 1px solid rgba(245,158,11.3); color: #FCD34D; }
+.badge-red { background: rgba(239,68,68.15); border: 1px solid rgba(239,68,68.3); color: #F87171; }
+
+/* Back link */
+.back { display: inline-flex; align-items: center; gap: 6px; font-family: var(--mono); font-size: 10.5px; letter-spacing: .04em; color: var(--ink-3); padding: 14px 0; transition: color .15s; }
+.back:hover { color: var(--ink); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Road Network Editor</span>
+    <div class="nav-links">
+      <a href="../../#work">Work</a>
+      <a href="../../#about">About</a>
+    </div>
+  </div>
+</nav>
+
+<div class="page">
+
+  <a class="back" href="../../">← All projects</a>
+
+  <div class="hero-row">
+    <div>
+      <div class="case-id">Concept Demo · Personal Project</div>
+      <h1>WebGIS Road: Collaborative Road Network Editor</h1>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.30);padding:5px 10px;margin-bottom:10px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:#F59E0B">
+        This is a concept demo, not a finished product. Fictional data, fictional users, fictional tasks.
+      </div>
+      <p class="desc">Browser-based multi-user road quality issue tracker and geometry editor. Three fictional field editors share a live PostGIS road network, claim tasks with one click, and see each other's progress update on the map in real time via 20-second polling.</p>
+      <div class="tags">
+        <span class="t">React 18 + TypeScript</span>
+        <span class="t">FastAPI + AsyncPG</span>
+        <span class="t">PostGIS + MVT</span>
+        <span class="t">MapLibre GL JS</span>
+        <span class="t">JWT auth</span>
+        <span class="t">Real-time polling</span>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px">
+        <a class="live-btn" href="https://clearway.rasterlayer.com" target="_blank" rel="noopener">
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#3B82F6" stroke-width="1.5"/><circle cx="5" cy="5" r="1.5" fill="#3B82F6"/></svg>
+          Live demo
+        </a>
+      </div>
+    </div>
+
+    <figure class="hero-img-box">
+      <img src="img/webgis_issues.png" alt="WebGIS Road editor with task list panel and coloured road pins on Barcelona map" loading="eager">
+      <figcaption>CartoDB Positron basemap, task list left, coloured task pins on Barcelona OSM road network</figcaption>
+    </figure>
+  </div>
+
+  <div class="metrics">
+    <div class="metric">
+      <div class="metric-k">Roads in DB</div>
+      <div class="metric-v">170,688</div>
+      <div class="metric-u">Barcelona OSM segments</div>
+    </div>
+    <div class="metric">
+      <div class="metric-k">Demo tasks</div>
+      <div class="metric-v">8</div>
+      <div class="metric-u">6 pending · 2 in_progress</div>
+    </div>
+    <div class="metric">
+      <div class="metric-k">Tile latency</div>
+      <div class="metric-v">&lt; 80 ms</div>
+      <div class="metric-u">MVT from PostGIS at Z14</div>
+    </div>
+    <div class="metric">
+      <div class="metric-k">Poll interval</div>
+      <div class="metric-v">20 s</div>
+      <div class="metric-u">real-time task sync</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">01</span><span class="sh-title">What it does</span></div>
+  <p class="body-text">
+    WebGIS Road is a browser-based road quality issue tracker and geometry editor for Barcelona. Three field editors, each responsible for a neighbourhood (Eixample, Gràcia, Ciutat Vella), can log in, browse open tasks in the left panel, click any task to zoom the map to the affected road segments with an orange highlight overlay, and take ownership with a single button. The map pin immediately turns yellow and shows the assignee's initials: visible to every other user via 20-second polling.
+  </p>
+  <p class="body-text">
+    On top of the geometry editor sits a full task management system. Any supervisor can create a work order tied to one or more road segments, assign it to a team member, and track it through a four-state lifecycle. Every mutation writes to an <code style="font-family:var(--mono);font-size:11.5px;background:var(--surface-2);padding:1px 5px">task_activity</code> audit table, so the timeline of every job (who created it, who picked it up, every status change) is always visible.
+  </p>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">02</span><span class="sh-title">End-to-end task workflow</span></div>
+  <p class="body-text">The full lifecycle from road click to job completion, demonstrably wired, not mocked:</p>
+
+  <div class="flow">
+    <div class="flow-step">
+      <span class="flow-step-n">Step 1</span>
+      <span class="flow-step-label">Click road</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Step 2</span>
+      <span class="flow-step-label">Inspect attributes</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Step 3</span>
+      <span class="flow-step-label">Create task</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Step 4</span>
+      <span class="flow-step-label">Assign + set priority</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Step 5</span>
+      <span class="flow-step-label">Start work</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Step 6</span>
+      <span class="flow-step-label">Comment + close</span>
+    </div>
+    <span class="flow-arrow">→</span>
+    <div class="flow-step">
+      <span class="flow-step-n">Step 7</span>
+      <span class="flow-step-label">Activity history</span>
+    </div>
+  </div>
+
+  <p class="body-text" style="margin-top:16px">
+    Each step is backed by a real API call. The map immediately reflects any change: coloured pins appear on task roads, an amber highlight overlays the road segments, and the map flies to centre the task area when opened. The task panel shows the full audit trail, who created the task, who it was assigned to, every status transition, every comment.
+  </p>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">03</span><span class="sh-title">Demo scenarios</span></div>
+  <p class="body-text">Three fictional editor accounts: open two windows simultaneously to watch real-time collaboration:</p>
+
+  <div class="scenarios">
+    <div class="scenario">
+      <div class="scenario-label" style="color:#3B82F6">Marta Puig, Eixample</div>
+      <div class="scenario-title">Task owner</div>
+      <ul class="scenario-steps">
+        <li>Browse 8 demo tasks in the left panel</li>
+        <li>Click any task: map flies to affected roads and shows orange highlight</li>
+        <li>Take task: pin turns yellow with "MP" badge</li>
+        <li>Open inspector, edit speed limit, surface, or lane count</li>
+        <li>Publish changeset: tiles refresh immediately</li>
+      </ul>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:#8B5CF6">Jordi Mas, Gracia</div>
+      <div class="scenario-title">Observer and collaborator</div>
+      <ul class="scenario-steps">
+        <li>Open in a second window while Marta takes a task</li>
+        <li>Within 20 seconds the pin turns yellow with "MP" badge</li>
+        <li>Take a different task: "JM" badge appears on that pin</li>
+        <li>Both assignee badges visible simultaneously on the map</li>
+      </ul>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:#EF4444">Anna Sola, Ciutat Vella</div>
+      <div class="scenario-title">In-progress tasks</div>
+      <ul class="scenario-steps">
+        <li>Two tasks pre-seeded as in_progress with "JM"/"AS" badges</li>
+        <li>One-way tagging task already assigned to Jordi</li>
+        <li>Mark task done: pin disappears from map</li>
+        <li>Demo reset (login page) restores all 8 tasks to initial state</li>
+      </ul>
+    </div>
+    <div class="scenario">
+      <div class="scenario-label" style="color:#10B981">Road inspector flow</div>
+      <div class="scenario-title">Direct road editing</div>
+      <ul class="scenario-steps">
+        <li>Click any road on the map to open the inspector</li>
+        <li>Edit highway type, surface, name, speed limit, lane count, oneway</li>
+        <li>Drag vertices to reshape geometry; coordinate input for precision</li>
+        <li>Review changeset: publish: tiles reload</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">04</span><span class="sh-title">Features</span></div>
+
+  <div class="two-col">
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(59,130,246.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg>
+      </div>
+      <div class="feature-title">Live MVT vector tiles</div>
+      <div class="feature-desc">PostGIS ST_AsMVT served over FastAPI. Tiles refresh after every publish. Road colour and width vary by highway class and editability at every zoom level.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(16,185,129.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      </div>
+      <div class="feature-title">Task state machine</div>
+      <div class="feature-desc">Four states with typed transitions: pending → in_progress → done / rejected. Every mutation writes to a task_activity audit table. Full history visible in the Activity tab.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(245,158,11.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FCD34D" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div class="feature-title">Map task pins</div>
+      <div class="feature-desc">Each task places an SVG teardrop pin at the midpoint of its road segments. Grey = pending, yellow = in_progress. Done and rejected tasks hide their pins. Assignee badge shows initials: blue for self, purple for others.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(139,92,246.15)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      </div>
+      <div class="feature-title">Multi-user with real-time polling</div>
+      <div class="feature-desc">JWT auth, three editor accounts, per-area assignment. Task assignments poll every 20 seconds: pin colours and assignee badges update across all open sessions automatically. No WebSocket needed.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(59,130,246.12)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#60A5FA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+      </div>
+      <div class="feature-title">Vertex editing + snapping</div>
+      <div class="feature-desc">Drag existing vertices to reshape roads. Midpoint handles insert new vertices. Snap-to-road within 14 px. Ctrl+Z undo history. Saves to a local changeset before publishing.</div>
+    </div>
+    <div class="feature">
+      <div class="feature-icon" style="background:rgba(16,185,129.12)">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+      </div>
+      <div class="feature-title">Changeset review + publish</div>
+      <div class="feature-desc">All edits staged locally before committing. Review drawer shows each pending change (new / modified / deleted). Single publish call batches them to the backend, refreshes tiles on success.</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">05</span><span class="sh-title">Technical stack</span></div>
+
+  <table class="stack-table">
+    <tr>
+      <td>Frontend</td>
+      <td>React 18 + Vite + TypeScript, single-page app. MapLibre GL JS for all map rendering. CartoDB Positron basemap. <code style="font-family:var(--mono);font-size:11px">maplibregl.Marker</code> for SVG teardrop task pins. Inline styles, zero CSS-in-JS overhead.</td>
+    </tr>
+    <tr>
+      <td>Map tiles</td>
+      <td>PostGIS <code style="font-family:var(--mono);font-size:11px">ST_AsMVT</code> → FastAPI → MapLibre. Token-authenticated MVT endpoint at <code style="font-family:var(--mono);font-size:11px">/api/tiles/{z}/{x}/{y}.pbf</code>. Sub-80 ms tile latency at zoom 14.</td>
+    </tr>
+    <tr>
+      <td>Backend</td>
+      <td>FastAPI + SQLAlchemy async + asyncpg. Task endpoints (list, detail, status, assign). Road geometry endpoint for highlight overlay. Demo reset endpoint. Raw SQL for tile generation.</td>
+    </tr>
+    <tr>
+      <td>Auth</td>
+      <td>JWT Bearer token stored in localStorage. Three area editor accounts. Token validated on every API request. 6-second timeout; 401 response clears token and returns to login.</td>
+    </tr>
+    <tr>
+      <td>Database</td>
+      <td>PostgreSQL 15 + PostGIS 3. <code style="font-family:var(--mono);font-size:11px">roads</code> table with geometry(LineString, 4326) + attributes. <code style="font-family:var(--mono);font-size:11px">tasks</code> table with jsonb road_ids array. <code style="font-family:var(--mono);font-size:11px">task_activity</code> audit log. GIST spatial index on road geometry.</td>
+    </tr>
+    <tr>
+      <td>Data</td>
+      <td>OpenStreetMap Barcelona extract via Overpass API. 170,688 road segments covering three named neighbourhoods, imported with geometry and OSM attributes preserved.</td>
+    </tr>
+  </table>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">06</span><span class="sh-title">Design system</span></div>
+  <p class="body-text">
+    Light-first UI: <code style="font-family:var(--mono);font-size:11.5px;background:var(--surface-2);padding:1px 5px">#F8F9FA</code> page background, <code style="font-family:var(--mono);font-size:11.5px;background:var(--surface-2);padding:1px 5px">#FFFFFF</code> panel background, <code style="font-family:var(--mono);font-size:11.5px;background:var(--surface-2);padding:1px 5px">#E5E7EB</code> borders. Both fixed panels (300 px left, 360 px right) use <code style="font-family:var(--mono);font-size:11.5px;background:var(--surface-2);padding:1px 5px">position: fixed</code> and all map zooms use panel-aware padding so selected roads are never hidden behind the UI.
+  </p>
+  <p class="body-text">
+    Status colour encodes consistently across every surface: task list cards, map pins, and detail headers. Map pins are teardrop SVGs: grey for pending, yellow (#F59E0B) for in_progress, hidden once done. Assignee badge on the pin is blue (#2563EB) for yourself, purple (#7C3AED) for another user's tasks.
+  </p>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:14px">
+    <span class="badge badge-blue">In Progress</span>
+    <span class="badge badge-green">Done</span>
+    <span class="badge badge-amber">Urgent</span>
+    <span class="badge badge-red">Rejected</span>
+    <span style="padding:2px 8px;border-radius:999px;background:rgba(148,163,184.1);border:1px solid rgba(148,163,184.2);font-size:10.5px;font-weight:600;color:#94A3B8">Pending</span>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">07</span><span class="sh-title">Screenshots</span></div>
+  <p class="body-text">All screenshots taken from the live demo at clearway.rasterlayer.com, 1440 x 900. This is a concept demo: the users, tasks, and road data are fictional.</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/webgis_login.png" alt="Login page with three demo user cards and demo reset button" loading="lazy">
+      <figcaption>Login page: one-click sign-in as Marta, Jordi, or Anna. Demo reset restores all 8 tasks to initial state.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/webgis_issues.png" alt="Editor view with issue list on left and task pins on Barcelona map" loading="lazy">
+      <figcaption>Editor with task list panel open. Coloured pins on the CartoDB Positron basemap show task status across the road network.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/webgis_task_detail.png" alt="Task detail panel with orange road highlight overlay on map" loading="lazy">
+      <figcaption>Task detail open: map flies to affected roads with orange highlight overlay. "Take task" button available for pending tasks.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/webgis_task_taken.png" alt="Map pin turned yellow with assignee initials badge after taking a task" loading="lazy">
+      <figcaption>After taking a task: pin turns yellow immediately with "MP" badge. Other users see the update within 20 seconds via polling.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/traverse_taskdrawer.png" alt="Task drawer open showing task description, comments and status actions" loading="lazy">
+      <figcaption>Task drawer: description, comment thread, status transitions. Marta, Jordi, and Anna can all comment and advance the state.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/traverse_activity.png" alt="Activity tab showing full audit trail of task state changes and comments" loading="lazy">
+      <figcaption>Activity tab: full audit trail. Every status transition and comment is recorded with timestamp and user.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0;grid-column:1/-1">
+      <img src="img/webgis_in_progress.png" alt="In-progress task detail with assignee badge and yellow pin on map" loading="lazy">
+      <figcaption>In-progress task view: yellow pin with assignee badge, road inspector open with speed limit, surface, lane count, and oneway fields. Road highlight persists on the map.</figcaption>
+    </figure>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="sh"><span class="sh-no">08</span><span class="sh-title">Bugs found and fixed in production</span></div>
+  <p class="body-text">Four issues caught after deploying to EC2 and testing live at clearway.rasterlayer.com. Each fix below shows the exact change made.</p>
+
+  <div style="display:flex;flex-direction:column;gap:20px;margin-top:20px">
+
+    <div style="border:1px solid var(--rule-strong);border-radius:6px;overflow:hidden">
+      <div style="background:var(--surface-2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600;color:var(--ink)">TaskDrawer overlaps TopBar on open</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--accent)">TaskDrawer.tsx</span>
+      </div>
+      <div style="padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.7">
+        <div style="color:#EF4444">- position:"fixed", right:0, <strong>top:0</strong>, bottom:0, width:420, zIndex:50</div>
+        <div style="color:#EF4444">- &lt;div onClick={onClose} style={{ position:"fixed", <strong>inset:0</strong>, zIndex:49 }}/&gt;</div>
+        <div style="color:#10B981;margin-top:4px">+ position:"fixed", right:0, <strong>top:52</strong>, bottom:0, width:420, zIndex:50</div>
+        <div style="color:#10B981">+ &lt;div onClick={onClose} style={{ position:"fixed", <strong>top:52, right:0, bottom:0, left:0</strong>, zIndex:49 }}/&gt;</div>
+      </div>
+      <div style="padding:6px 14px 10px;font-size:11.5px;color:var(--ink-2)">TaskDrawer started at <code style="font-family:var(--mono);font-size:10.5px">top:0</code>, covering the 52px TopBar (z-index 40) because the drawer was at z-index 50. Backdrop also blocked TopBar interaction. Changed both to <code style="font-family:var(--mono);font-size:10.5px">top:52</code>.</div>
+    </div>
+
+    <div style="border:1px solid var(--rule-strong);border-radius:6px;overflow:hidden">
+      <div style="background:var(--surface-2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600;color:var(--ink)">Task pins drift during map zoom</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--accent)">Editor.tsx mkTaskPin()</span>
+      </div>
+      <div style="padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.7">
+        <div style="color:#EF4444">- &lt;svg style="<strong>filter:drop-shadow(0 2px 6px rgba(0,0,0,0.5));overflow:visible</strong>"&gt;</div>
+        <div style="color:#10B981;margin-top:4px">+ &lt;svg overflow="visible"&gt;&lt;defs&gt;&lt;filter id="ps-..."&gt;</div>
+        <div style="color:#10B981">+   &lt;feDropShadow dx="0" dy="2" stdDeviation="2.5"/&gt;</div>
+        <div style="color:#10B981">+ &lt;/filter&gt;&lt;/defs&gt;&lt;path ... <strong>filter="url(#ps-...)"</strong>/&gt;</div>
+      </div>
+      <div style="padding:6px 14px 10px;font-size:11.5px;color:var(--ink-2)">CSS <code style="font-family:var(--mono);font-size:10.5px">filter</code> on the SVG root creates a GPU stacking context that conflicts with MapLibre's transform-based marker positioning during zoom animations. Moved the shadow to an SVG <code style="font-family:var(--mono);font-size:10.5px">&lt;filter&gt;</code> applied only to the path element, which doesn't affect the marker's layout bounding box.</div>
+    </div>
+
+    <div style="border:1px solid var(--rule-strong);border-radius:6px;overflow:hidden">
+      <div style="background:var(--surface-2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600;color:var(--ink)">Road drawing lags with 170k loaded roads</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--accent)">Editor.tsx mousemove</span>
+      </div>
+      <div style="padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.7">
+        <div style="color:#EF4444">- map.on("mousemove", (e) =&gt; {</div>
+        <div style="color:#EF4444">-   const visualSnap = <strong>getVisualSnapPoint(map, e)</strong>; // on every event</div>
+        <div style="color:#10B981;margin-top:4px">+ pendingSnapEventRef.current = e;</div>
+        <div style="color:#10B981">+ if (snapRafRef.current === null) {</div>
+        <div style="color:#10B981">+   snapRafRef.current = requestAnimationFrame(() =&gt; {</div>
+        <div style="color:#10B981">+     const visualSnap = <strong>getVisualSnapPoint(map, pendingSnapEventRef.current)</strong>;</div>
+        <div style="color:#10B981">+   });</div>
+        <div style="color:#10B981">+ }</div>
+      </div>
+      <div style="padding:6px 14px 10px;font-size:11.5px;color:var(--ink-2)"><code style="font-family:var(--mono);font-size:10.5px">queryRenderedFeatures</code> scans the tile renderer on every raw mousemove event (can be 120 fps). With 170k road segments rendered, each call iterates through dozens of features within the 28px snap radius. Wrapped in a <code style="font-family:var(--mono);font-size:10.5px">requestAnimationFrame</code> guard to cap at 60 fps.</div>
+    </div>
+
+    <div style="border:1px solid var(--rule-strong);border-radius:6px;overflow:hidden">
+      <div style="background:var(--surface-2);padding:10px 14px;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:600;color:var(--ink)">Drawing mode: no coordinate input</span>
+        <span style="font-family:var(--mono);font-size:10px;color:var(--accent)">Editor.tsx + new UI</span>
+      </div>
+      <div style="padding:12px 14px;font-family:var(--mono);font-size:11px;line-height:1.7">
+        <div style="color:#10B981">+ {drawing &amp;&amp; (</div>
+        <div style="color:#10B981">+   &lt;div style={{ position:"fixed", bottom:46, left:"50%", ... }}&gt;</div>
+        <div style="color:#10B981">+     &lt;input placeholder="41.3851, 2.1734" onKeyDown={e =&gt;</div>
+        <div style="color:#10B981">+       e.key==="Enter" &amp;&amp; handleCoordSubmit(coordInput)} /&gt;</div>
+        <div style="color:#10B981">+     &lt;button onClick={() =&gt; handleCoordSubmit(coordInput)}&gt;Add&lt;/button&gt;</div>
+        <div style="color:#10B981">+   &lt;/div&gt;</div>
+        <div style="color:#10B981">+ )}</div>
+      </div>
+      <div style="padding:6px 14px 10px;font-size:11.5px;color:var(--ink-2)">Added a floating coordinate input that appears only in drawing mode. Accepts <code style="font-family:var(--mono);font-size:10.5px">lat, lng</code> or <code style="font-family:var(--mono);font-size:10.5px">lng, lat</code> (auto-detected by magnitude), adds the vertex, pans the map, and clears the field on Enter.</div>
+    </div>
+
+  </div>
+
+  <div class="rule"></div>
+  <div style="padding-bottom: 64px">
+    <a class="back" href="../../">← All projects</a>
+  </div>
+
+</div>
+
+<footer class="foot">
+  <span class="foot-brand">Egehan Yaglici</span>
+  <div class="foot-links">
+    <a href="../../#work">Work</a>
+    <a href="../../#about">About</a>
+    <a href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
+  </div>
+</footer>
+
+</body>
+</html>
