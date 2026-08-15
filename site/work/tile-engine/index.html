@@ -93,16 +93,23 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 <body>
 <div class="page">
 
-<nav style="padding-top:18px;padding-bottom:4px;border-bottom:1px solid var(--rule);margin-bottom:0">
-  <a href="../../" style="font-family:var(--mono);font-size:11px;color:var(--ink-3);text-decoration:none">← Egehan Yaglici</a>
+<nav class="nav">
+  <div class="wrap nav-i">
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Browser Tile Engine</span>
+    <div class="nav-links">
+      <a href="../../#work">Work</a>
+      <a href="../../#about">About</a>
+    </div>
+  </div>
 </nav>
 
 <div class="hero-row">
   <div>
     <div class="case-id">Client Work &middot; Geospatial Pipeline Consulting</div>
     <h1>Browser-Based<br>Tile Engine</h1>
-    <p class="desc">Pipeline consulting engagement: a client needed high-resolution CAD plan images served as Mapbox-compatible slippy map tiles, without a server or GDAL. I designed and delivered the complete technical architecture, georeferencing via homography, anti-aliasing via a Lanczos3 mipmap pyramid, and a parallelised Z/X/Y export pipeline running entirely in the browser.</p>
-    <p class="desc-sm">The engine produces sub-pixel-accurate 512 px tiles across Z9-22, packaged as a standard zip archive ready to drop behind any static file server.</p>
+    <p class="desc">Consulting engagement: a client needed high-resolution CAD plan images served as Mapbox-compatible slippy map tiles, without a server or GDAL. Their existing process took several hours per site, required dedicated infrastructure, and blocked non-technical staff. I designed and delivered a complete browser-based pipeline that runs without installation.</p>
+    <p class="desc-sm">The engine produces sub-pixel-accurate 512 px tiles across Z9-22, packaged as a standard zip archive ready to drop behind any static file server. Source code is not published: this was a consulting engagement delivered under NDA.</p>
     <div class="tags">
       <span class="t">Vanilla JS</span>
       <span class="t">Canvas 2D API</span>
@@ -122,15 +129,18 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 <div class="rule"></div>
 
 <div class="fig-row">
-  <div class="fig-cell"><div class="fk">Zoom range</div><div class="fv">Z9-22</div><div class="fu">min → max</div></div>
-  <div class="fig-cell"><div class="fk">Tile size</div><div class="fv">512 px</div><div class="fu">Mapbox-compatible</div></div>
-  <div class="fig-cell"><div class="fk">Tiles generated</div><div class="fv">4,065</div><div class="fu">example output</div></div>
+  <div class="fig-cell"><div class="fk">Process time</div><div class="fv">&lt; 10 min</div><div class="fu">previously several hours</div></div>
+  <div class="fig-cell"><div class="fk">Infrastructure</div><div class="fv">Zero</div><div class="fu">browser-only, no server</div></div>
+  <div class="fig-cell"><div class="fk">Tiles generated</div><div class="fv">4,065</div><div class="fu">Z9-22, 512 px each</div></div>
   <div class="fig-cell"><div class="fk">GSD at Z22</div><div class="fv">4.8 cm</div><div class="fu">per pixel</div></div>
 </div>
 
 <div class="sh"><span class="sh-no">01</span><span class="sh-title">The brief</span></div>
-<p class="body-text">The client had high-resolution CAD plan images, flat rectilinear rasters with no coordinate metadata, and needed them served as standard slippy map tiles over a Mapbox basemap. The standard approach (GDAL, TiTiler, cloud infrastructure) was ruled out: the solution had to run entirely in a browser tab with no server-side processing.</p>
-<p class="body-text">A second constraint was aliasing: rendering a 22,000 px source directly into a 512 px tile at low zoom levels produces severe Moiré patterns. The architecture had to pre-compute a quality pyramid and select the appropriate tier at render time.</p>
+<p class="body-text">The client managed a portfolio of sites, each with a high-resolution CAD plan: flat rectilinear rasters, no coordinate metadata, and a need to overlay them on a live Mapbox basemap for field teams. Their existing approach required GDAL on a server, manual coordinate entry, TiTiler, and cloud storage configuration. Per-site turnaround was several hours. Non-technical staff could not do it themselves.</p>
+<p class="body-text">The requirement was a zero-infrastructure solution: load the image in a browser tab, enter four GPS corner coordinates, click export, get a zip of standard Z/X/Y PNG tiles. A second constraint was aliasing: rendering a 22,000 px source directly into a 512 px tile at low zoom levels produces severe Moire patterns. The architecture had to pre-compute a quality pyramid and select the correct tier at render time.</p>
+<div class="collab-note" style="margin-top:16px">
+  <b>Outcome:</b> The delivered engine reduced the per-site tiling workflow from several hours to under 10 minutes. No installation, no server, no cloud account required. Field staff can now tile a new site themselves from any laptop.
+</div>
 
 <div class="sh"><span class="sh-no">02</span><span class="sh-title">Source material</span></div>
 
@@ -195,12 +205,14 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 </div>
 
 <div class="sh"><span class="sh-no">06</span><span class="sh-title">Deliverables</span></div>
-<div class="mn"><span class="mn-k">Engine source</span><span class="mn-v"><code>Tile_Engine.js</code>, self-contained, no build step, copy-paste integration</span></div>
-<div class="mn"><span class="mn-k">UI harness</span><span class="mn-v">HTML file: image loader, corner-coordinate inputs, zoom range selector, progress bar, zip download</span></div>
-<div class="mn"><span class="mn-k">Example output</span><span class="mn-v">4,065 PNG tiles (Z9-22) over Pointe du Hoc, Normandy, ready for Mapbox/MapLibre</span></div>
-<div class="mn"><span class="mn-k">Technical spec</span><span class="mn-v">9-page architecture specification covering all API surfaces, math kernels, and integration examples</span></div>
+<div class="mn"><span class="mn-k">Engine source</span><span class="mn-v">Self-contained JS module, no build step, copy-paste integration. Not published (NDA).</span></div>
+<div class="mn"><span class="mn-k">UI harness</span><span class="mn-v">Single HTML file: image loader, corner-coordinate inputs, zoom range selector, progress bar, zip download</span></div>
+<div class="mn"><span class="mn-k">Example output</span><span class="mn-v">4,065 PNG tiles (Z9-22) over Pointe du Hoc, Normandy, compatible with Mapbox and MapLibre GL JS</span></div>
+<div class="mn"><span class="mn-k">Technical spec</span><span class="mn-v">9-page architecture specification covering all API surfaces, math kernels, and integration examples. Delivered to client.</span></div>
 
-<a class="src-btn" href="data/Tile_Engine.js" target="_blank" rel="noopener">View Tile_Engine.js ↗</a>
+<div class="collab-note" style="margin-top:20px">
+  Source code is not published. This was a consulting engagement delivered under NDA. The images above are from an example dataset (Pointe du Hoc, Normandy); client plan data is not shown.
+</div>
 
 <div style="height:64px"></div>
 </div>

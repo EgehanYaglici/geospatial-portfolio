@@ -107,8 +107,8 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 
 <nav class="nav">
   <div class="wrap nav-i">
-    <span class="nav-brand">Egehan Yaglici</span>
-    <div class="nav-sep"></div>
+    <a class="nav-home" href="../../">Egehan Yaglici</a>
+    <span class="nav-ctx">Road Network Editor</span>
     <div class="nav-links">
       <a href="../../#work">Work</a>
       <a href="../../#about">About</a>
@@ -122,9 +122,12 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
 
   <div class="hero-row">
     <div>
-      <div class="case-id">Personal Project · Web GIS Platform</div>
+      <div class="case-id">Concept Demo · Personal Project</div>
       <h1>WebGIS Road: Collaborative Road Network Editor</h1>
-      <p class="desc">Browser-based multi-user road quality issue tracker and geometry editor. Three field editors share a live PostGIS road network, claim tasks with one click, and see each other's progress update on the map in real time via 20-second polling.</p>
+      <div style="display:inline-flex;align-items:center;gap:6px;background:rgba(245,158,11,0.10);border:1px solid rgba(245,158,11,0.30);padding:5px 10px;margin-bottom:10px;font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:#F59E0B">
+        This is a concept demo, not a finished product. Fictional data, fictional users, fictional tasks.
+      </div>
+      <p class="desc">Browser-based multi-user road quality issue tracker and geometry editor. Three fictional field editors share a live PostGIS road network, claim tasks with one click, and see each other's progress update on the map in real time via 20-second polling.</p>
       <div class="tags">
         <span class="t">React 18 + TypeScript</span>
         <span class="t">FastAPI + AsyncPG</span>
@@ -154,9 +157,9 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
       <div class="metric-u">Barcelona OSM segments</div>
     </div>
     <div class="metric">
-      <div class="metric-k">Seed tasks</div>
-      <div class="metric-v">11</div>
-      <div class="metric-u">9 pending · 2 in_progress</div>
+      <div class="metric-k">Demo tasks</div>
+      <div class="metric-v">8</div>
+      <div class="metric-u">6 pending · 2 in_progress</div>
     </div>
     <div class="metric">
       <div class="metric-k">Tile latency</div>
@@ -229,38 +232,38 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
   <div class="rule"></div>
 
   <div class="sh"><span class="sh-no">03</span><span class="sh-title">Demo scenarios</span></div>
-  <p class="body-text">Three editor accounts: open two windows simultaneously to watch real-time collaboration:</p>
+  <p class="body-text">Three fictional editor accounts: open two windows simultaneously to watch real-time collaboration:</p>
 
   <div class="scenarios">
     <div class="scenario">
       <div class="scenario-label" style="color:#3B82F6">Marta Puig, Eixample</div>
       <div class="scenario-title">Task owner</div>
       <ul class="scenario-steps">
-        <li>Browse 11 seed tasks in the left panel</li>
-        <li>Click any task → map flies to affected roads + orange highlight</li>
-        <li>Take task → pin turns yellow with "MP" badge</li>
-        <li>Edit road attributes in the inspector</li>
-        <li>Publish changeset → tiles refresh immediately</li>
+        <li>Browse 8 demo tasks in the left panel</li>
+        <li>Click any task: map flies to affected roads and shows orange highlight</li>
+        <li>Take task: pin turns yellow with "MP" badge</li>
+        <li>Open inspector, edit speed limit, surface, or lane count</li>
+        <li>Publish changeset: tiles refresh immediately</li>
       </ul>
     </div>
     <div class="scenario">
-      <div class="scenario-label" style="color:#8B5CF6">Jordi Mas, Gràcia</div>
-      <div class="scenario-title">Observer + collaborator</div>
+      <div class="scenario-label" style="color:#8B5CF6">Jordi Mas, Gracia</div>
+      <div class="scenario-title">Observer and collaborator</div>
       <ul class="scenario-steps">
         <li>Open in a second window while Marta takes a task</li>
         <li>Within 20 seconds the pin turns yellow with "MP" badge</li>
-        <li>Take a different task → "JM" badge appears on that pin</li>
+        <li>Take a different task: "JM" badge appears on that pin</li>
         <li>Both assignee badges visible simultaneously on the map</li>
       </ul>
     </div>
     <div class="scenario">
-      <div class="scenario-label" style="color:#EF4444">Anna Solà, Ciutat Vella</div>
+      <div class="scenario-label" style="color:#EF4444">Anna Sola, Ciutat Vella</div>
       <div class="scenario-title">In-progress tasks</div>
       <ul class="scenario-steps">
         <li>Two tasks pre-seeded as in_progress with "JM"/"AS" badges</li>
-        <li>Roundabout topology task already assigned to Anna</li>
-        <li>Mark task done → pin disappears from map</li>
-        <li>Demo reset (login page) restores all 11 tasks to initial state</li>
+        <li>One-way tagging task already assigned to Jordi</li>
+        <li>Mark task done: pin disappears from map</li>
+        <li>Demo reset (login page) restores all 8 tasks to initial state</li>
       </ul>
     </div>
     <div class="scenario">
@@ -268,9 +271,9 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
       <div class="scenario-title">Direct road editing</div>
       <ul class="scenario-steps">
         <li>Click any road on the map to open the inspector</li>
-        <li>Edit highway class, surface, lanes, max speed, name</li>
-        <li>Drag vertices to reshape geometry</li>
-        <li>Review changeset → publish → tiles reload</li>
+        <li>Edit highway type, surface, name, speed limit, lane count, oneway</li>
+        <li>Drag vertices to reshape geometry; coordinate input for precision</li>
+        <li>Review changeset: publish: tiles reload</li>
       </ul>
     </div>
   </div>
@@ -375,12 +378,12 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
   <div class="rule"></div>
 
   <div class="sh"><span class="sh-no">07</span><span class="sh-title">Screenshots</span></div>
-  <p class="body-text">All screenshots taken from the live running application at 1440 × 900.</p>
+  <p class="body-text">All screenshots taken from the live demo at clearway.rasterlayer.com, 1440 x 900. This is a concept demo: the users, tasks, and road data are fictional.</p>
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px">
     <figure class="hero-img-box" style="margin:0">
       <img src="img/webgis_login.png" alt="Login page with three demo user cards and demo reset button" loading="lazy">
-      <figcaption>Login page: one-click sign-in as Marta, Jordi, or Anna. Demo reset restores all 11 seed tasks.</figcaption>
+      <figcaption>Login page: one-click sign-in as Marta, Jordi, or Anna. Demo reset restores all 8 tasks to initial state.</figcaption>
     </figure>
     <figure class="hero-img-box" style="margin:0">
       <img src="img/webgis_issues.png" alt="Editor view with issue list on left and task pins on Barcelona map" loading="lazy">
@@ -394,9 +397,17 @@ h1 { font-size: 1.6rem; font-weight: 600; letter-spacing: -.02em; line-height: 1
       <img src="img/webgis_task_taken.png" alt="Map pin turned yellow with assignee initials badge after taking a task" loading="lazy">
       <figcaption>After taking a task: pin turns yellow immediately with "MP" badge. Other users see the update within 20 seconds via polling.</figcaption>
     </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/traverse_taskdrawer.png" alt="Task drawer open showing task description, comments and status actions" loading="lazy">
+      <figcaption>Task drawer: description, comment thread, status transitions. Marta, Jordi, and Anna can all comment and advance the state.</figcaption>
+    </figure>
+    <figure class="hero-img-box" style="margin:0">
+      <img src="img/traverse_activity.png" alt="Activity tab showing full audit trail of task state changes and comments" loading="lazy">
+      <figcaption>Activity tab: full audit trail. Every status transition and comment is recorded with timestamp and user.</figcaption>
+    </figure>
     <figure class="hero-img-box" style="margin:0;grid-column:1/-1">
       <img src="img/webgis_in_progress.png" alt="In-progress task detail with assignee badge and yellow pin on map" loading="lazy">
-      <figcaption>In-progress task view: yellow pin with assignee badge, task status "In Progress" shown in the detail panel. Road highlight persists.</figcaption>
+      <figcaption>In-progress task view: yellow pin with assignee badge, road inspector open with speed limit, surface, lane count, and oneway fields. Road highlight persists on the map.</figcaption>
     </figure>
   </div>
 

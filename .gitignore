@@ -66,3 +66,21 @@ package-lock.json
 
 # Docker
 docker-compose.override.yml
+
+# Tile engine consulting code (NDA, not published)
+site/work/tile-engine/data/Tile_Engine.js
+
+# Project code directories (each has its own repo)
+01-cloud-urban-gis/
+02-spatial-api/
+03-geospatial-etl/
+04-rotterdam-elevation/
+05-sentinel1-sar/
+06-land-cover-segmentation/
+07-lidar-point-cloud/
+08-traverse-madrid/
+
+# Internal files
+pdf_reports/
+PORTFOLIO_CONTEXT.md
+tools/

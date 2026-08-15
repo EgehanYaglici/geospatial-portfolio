@@ -293,8 +293,7 @@ a { text-decoration: none; color: inherit; }
   <h1>Egehan Yaglici</h1>
   <p class="hero-role">Geospatial Data Engineer</p>
   <p class="hero-desc">
-    Seven end-to-end case studies in spatial data engineering, from raw LiDAR
-    and radar scenes to trained neural networks and production databases, plus five client projects and four written reports from the desktop GIS stack.
+    I build spatial data systems end to end: point cloud pipelines, satellite imagery analysis, traffic simulation, and WebGIS tools backed by PostGIS. This portfolio covers a range of projects from raw LiDAR processing and deep learning on Sentinel scenes to full-stack geospatial web applications.
   </p>
   <div class="hero-btns">
     <a class="btn" href="#work">Case Studies &darr;</a>
@@ -331,9 +330,13 @@ a { text-decoration: none; color: inherit; }
     <div>
       <h2>About</h2>
       <p>
-        I build spatial data systems end to end: acquiring data from national archives
-        and satellite catalogues, running it through reproducible pipelines, and validating
-        that the results are actually true before presenting them.
+        I am a geospatial data engineer with a background in geographic information systems and a focus on building end-to-end pipelines that take raw spatial data and turn it into something measurable and useful. My work spans several domains: airborne LiDAR processing, satellite change detection, road network analysis, and transport simulation.
+      </p>
+      <p>
+        Most of the projects here started as personal research questions. I wanted to understand how well a standard U-Net generalises across different SAR scenes, or what actually happens to average travel time when you slow down one artery through central Madrid. Building the whole system — data ingestion, processing, analysis, and a web interface to interact with the results — is how I get precise answers instead of rough estimates.
+      </p>
+      <p>
+        I am comfortable working at every layer of the stack: writing PostGIS queries and thinking about spatial index behaviour at the database level, authoring processing pipelines in Python, and building the React frontends that let someone without a GIS background explore the results. The common thread is that the spatial reasoning has to be correct before anything else matters.
       </p>
       <div class="about-btns">
         <a class="btn" href="https://github.com/egehanyaglici" target="_blank" rel="noopener">GitHub</a>
@@ -387,10 +390,15 @@ var CATEGORIES = [
     ]
   },
   {
-    id: 'client-work', title: 'Client Work', sub: 'Web GIS · Cartography · Consulting',
+    id: 'web-gis', title: 'Web GIS', sub: 'Demos · Personal projects',
     items: [
-      { n:'↗', slug:'traverse', title:'WebGIS Road: Collaborative Road Network Editor', desc:'Multi-user road quality issue tracker and geometry editor. Three field editors share live PostGIS data, claim tasks in one click, and see each other\'s pins update in real time via polling.', img:'work/traverse/img/webgis_issues.png', facts:[['Roads','170k+'],['Tasks','11 seed']], accent:'#3B82F6' },
-      { n:'↗', slug:'traverse-madrid', title:'Traverse: Madrid Traffic Scenario Lab', desc:'Real-time INFORMO traffic data + SUMO microsimulation. Design road closures or speed changes, run a simulation, compare KPIs against the baseline in under two minutes.', img:'work/traverse-madrid/img/app_home.png', facts:[['Sensors','4,893'],['Edges','5,942']], accent:'#3B82F6' },
+      { n:'Demo', slug:'traverse', title:'WebGIS Road: Collaborative Road Network Editor', desc:'Concept demo: multi-user road quality tracker and geometry editor. Three fictional field editors share live PostGIS data, claim tasks in one click, and see each other\'s pins update in real time via polling.', img:'work/traverse/img/webgis_issues.png', facts:[['Roads','170k+'],['Tasks','8 demo']], accent:'#3B82F6' },
+      { n:'Demo', slug:'traverse-madrid', title:'Traverse: Madrid Traffic Scenario Lab', desc:'Concept demo: real-time INFORMO traffic data and SUMO microsimulation. Design road closures or speed changes, run a simulation, compare KPIs against the baseline in under two minutes.', img:'work/traverse-madrid/img/map_loaded.png', facts:[['Sensors','4,893'],['Edges','5,942']], accent:'#3B82F6' }
+    ]
+  },
+  {
+    id: 'client-work', title: 'Client Work', sub: 'Cartography · Consulting',
+    items: [
       { n:'↗', slug:'weather-agency', title:'Weather graphics engine for broadcast and streaming', desc:'Full-stack web GIS platform: real-time radar, satellite and observation layers, keyframe animation timeline, 4K export, OBS/vMix integration.', img:'work/weather-agency/data/app.png', facts:[['Export','4K MP4'],['Layers','40+']] },
       { n:'↗', slug:'mitwaba', title:'Territoire de Mitwaba, administrative boundary digitisation', desc:'2016 CENI electoral atlas georeferenced onto a modern terrain base. 3 sectors, 14 groupements, 19,842 km² across Haut-Katanga, DR Congo. A0 print-ready output.', img:'work/mitwaba/data/map.jpg', facts:[['Area','19,842 km²'],['Scale','1:281,000']] },
       { n:'↗', slug:'tile-engine', title:'Tile pipeline consulting, browser georeferencing to Z/X/Y tiles', desc:'Pipeline architecture for a client: homography-based georeferencing, Lanczos3 mipmap anti-aliasing, parallelised tile export, all in the browser, no server required.', img:'work/tile-engine/data/tile_detail_z18.jpg', facts:[['Tiles','4,065'],['Zoom','9-22']] }
@@ -401,7 +409,7 @@ var CATEGORIES = [
 function renderCard(w) {
   var href = w.external ? w.external : 'work/' + w.slug + '/';
   var target = w.external ? ' target="_blank" rel="noopener"' : '';
-  var numLabel = w.n === '↗' ? '<span style="color:#636870">Client</span>' : 'Case ' + w.n;
+  var numLabel = w.n === '↗' ? '<span style="color:#636870">Client</span>' : w.n === 'Demo' ? '<span style="color:#3B82F6">Demo</span>' : 'Case ' + w.n;
   var ac = w.accent || '#3987e5';
   var imgHtml = w.img
     ? '<img src="' + w.img + '" alt="" loading="lazy">'
